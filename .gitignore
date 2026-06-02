@@ -1,0 +1,72 @@
+# ── Secrets ───────────────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── Python cache & build ──────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+pip-wheel-metadata/
+
+# ── Virtual environments ──────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+
+# ── Testing & coverage ────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+coverage.xml
+nosetests.xml
+
+# ── Generated vector database (ChromaDB) ─────────────────────────────────────
+chroma_db/
+
+# ── Data files (generated / downloaded — not source code) ────────────────────
+data/telecom_incidents.csv
+data/raw/
+# Telstra dataset folders (each stored as data/<name>.csv/<name>.csv)
+data/train.csv/
+data/test.csv/
+data/event_type.csv/
+data/log_feature.csv/
+data/resource_type.csv/
+data/severity_type.csv/
+data/sample_submission.csv/
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+logs/
+*.log
+
+# ── DeepEval cache ────────────────────────────────────────────────────────────
+.deepeval/
+
+# ── HuggingFace / ML caches ───────────────────────────────────────────────────
+.cache/
+*.cache
+
+# ── Frontend build & deps ─────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist
+frontend/dist/
+frontend/.vite/
+
+# ── OS / editor noise ─────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/settings.json
