@@ -38,7 +38,17 @@ async def analytics_summary():
     docs = store.get_all_documents(limit=5000)
 
     if not docs:
-        return {"message": "No incidents indexed yet. Run /api/ingest first.", "total": 0}
+        return {
+            "total_incidents": 0,
+            "severity_distribution": {},
+            "technology_breakdown": {},
+            "vendor_breakdown": {},
+            "top_regions": {},
+            "top_service_impacts": {},
+            "avg_outage_minutes_by_severity": {},
+            "critical_count": 0,
+            "high_count": 0,
+        }
 
     severity_counts: Counter = Counter()
     tech_counts: Counter = Counter()

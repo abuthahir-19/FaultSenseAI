@@ -117,11 +117,17 @@ export default function AnalyticsDashboard() {
         <div className="text-center py-10 text-slate-400">Loading analytics...</div>
       )}
 
-      {summary && (
+      {!loadingSummary && summary && summary.total_incidents === 0 && (
+        <div className="text-center py-10 text-slate-400">
+          No incidents indexed yet. Use the <strong className="text-slate-300">ingest button</strong> in the header to load data.
+        </div>
+      )}
+
+      {summary && summary.total_incidents > 0 && (
         <>
           {/* KPI cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <StatCard label="Total Incidents" value={summary.total_incidents.toLocaleString()} icon={BarChart2} color="bg-blue-600" />
+            <StatCard label="Total Incidents" value={(summary.total_incidents ?? 0).toLocaleString()} icon={BarChart2} color="bg-blue-600" />
             <StatCard label="Critical" value={summary.critical_count} icon={AlertTriangle} color="bg-red-600" />
             <StatCard label="High Severity" value={summary.high_count} icon={Zap} color="bg-orange-600" />
             <StatCard label="Technologies" value={Object.keys(summary.technology_breakdown).length} icon={Cpu} color="bg-purple-600" />

@@ -1,4 +1,4 @@
-# Panel Presentation: TelecomNetworkFaultIntel
+# Panel Presentation: Telecom Network Fault Intelligence Assistant
 ## 10-Minute Demo Script
 
 ---
@@ -7,9 +7,9 @@
 
 **[Speak to panel]**
 
-"Every day, a telecom NOC processes thousands of alarm events. An engineer on shift might see 500 alarms per hour. The traditional approach is rule-based correlation: if alarm code X fires on device Y, page the on-call team. But rule engines cannot reason. They cannot tell you *why* the alarm fired, *what similar failures looked like historically*, or *what the fastest path to resolution is*.
+"Every day, a telecom NOC processes thousands of alarm events. An engineer on shift might see 500 alarms per hour. The traditional approach is rule-based correlation: if alarm code X fires on device Y, page the on-call team. But rule engines cannot reason. They cannot tell you *why* the alarm fired, *what similar failures looked like historically*, or *what the fastest path to resolution is* — and they certainly can't forecast which regions are likely to have outages next week.
 
-This project — TelecomNetworkFaultIntel — answers those questions using a RAG-powered multi-agent AI system. An engineer types a natural language description of what they're seeing, and within 30 seconds receives: the most relevant historical incidents, an automatic alarm correlation analysis, a GPT-4o root cause explanation, and categorized remediation steps — all traceable through a live agent reasoning log."
+This project — TelecomNetworkFaultIntel — answers those questions using a RAG-powered multi-agent AI system combined with an analytics and predictive intelligence layer. An engineer types a natural language description of what they're seeing, and within 30 seconds receives: the most relevant historical incidents, an automatic alarm correlation analysis, a GPT-4o root cause explanation, and categorized remediation steps — all traceable through a live agent reasoning log. Separately, the analytics dashboard gives NOC managers real-time KPIs, 30-day trend visibility, and AI-generated outage forecasts."
 
 ---
 
@@ -21,31 +21,31 @@ This project — TelecomNetworkFaultIntel — answers those questions using a RA
 
 The pipeline has three layers:
 
-**Data layer** — A ChromaDB vector store holds OpenAI embeddings of 1,000 synthetic telecom incidents. Alongside it, a BM25 keyword index handles exact term matching. Together they form our hybrid retriever.
+**Data layer** — A ChromaDB vector store holds OpenAI embeddings of 9,828 synthetic telecom incidents. Alongside it, a BM25 keyword index handles exact term matching. Together they form our hybrid retriever. Ingestion uses concurrent embedding — 3 parallel API workers, 512-doc batches — reducing ingest time from ~50 seconds to ~12-15 seconds.
 
-**Intelligence layer** — This is the core. A LangGraph state machine runs four agents sequentially:
-- Agent 1 runs hybrid retrieval — it fuses semantic and keyword results using Reciprocal Rank Fusion.
-- Agent 2 runs deterministic alarm correlation — clustering incidents by region, technology, and time window to surface systemic failures.
-- Agent 3 invokes GPT-4o to reason over the clusters and produce a root cause narrative.
-- Agent 4 invokes GPT-4o again to produce categorized recommendations: IMMEDIATE, DIAGNOSTIC, RESOLUTION, PREVENTIVE, ESCALATION.
+**Intelligence layer** — This is the core. Four subsystems run here:
+- A LangGraph state machine with four agents: Retrieval → Correlation → Root Cause → Recommendation
+- An Analytics engine (`/api/analytics/*`) aggregating severity, technology, vendor, and region statistics from ChromaDB
+- A Predictive Intelligence engine (`predictor.py`) that mines historical hotspots, vendor failure patterns, and peak-hour windows, then calls GPT-4o-mini to generate a risk forecast narrative
+- An LLM-as-Judge Evaluator that scores each analysis on Faithfulness, Answer Relevance, and Context Precision (RAGAS-style)
 
-**Presentation layer** — FastAPI exposes two endpoints: `/api/query` for fast retrieval and `/api/analyze` for the full agent pipeline. The React frontend visualizes everything with a color-coded agent trace accordion.
+**Presentation layer** — FastAPI exposes 13 endpoints across query, analytics, and management. The React frontend has 7 components including an Analytics Dashboard tab and an ErrorBoundary that prevents blank-page crashes.
 
-The key design insight is: *LLM reasoning is only invoked where generalization is needed* — agents 3 and 4. The retrieval and correlation steps are deterministic and auditable."
+The key design insight: *LLM reasoning is only invoked where generalization is needed* — root cause, recommendation, prediction, and evaluation. Retrieval, correlation, and KPI aggregation are all deterministic."
 
 ---
 
-## LIVE DEMO — 5 Minutes
+## LIVE DEMO — 6 Minutes
 
-### Step 1: Swagger UI (30 seconds)
+### Step 1: Health Check (30 seconds)
 
 **[Open browser to http://localhost:8000/docs]**
 
-"Here is the auto-generated Swagger documentation. You can see all four endpoints: health, query, analyze, ingest. Everything is testable directly from this UI. Let me start with the health endpoint."
+"Here is the auto-generated Swagger documentation. You can see all 13 endpoints across query, analytics, incidents, and management. Let me start with the health endpoint."
 
 **[Click GET /health → Execute]**
 
-"You can see the system is live and reports the number of indexed documents — currently 1,000 incidents in ChromaDB."
+"The system reports live and shows the number of indexed documents — 9,828 incidents in ChromaDB."
 
 ---
 
@@ -81,47 +81,59 @@ The key design insight is: *LLM reasoning is only invoked where generalization i
 
 **[Enter same request body, Execute]**
 
-"This takes 15-30 seconds because four agents are running sequentially. Watch the response structure:
+"This takes 15-30 seconds because four agents run sequentially. Watch the response structure:
 
-First, `reasoning_trace` — this is the audit log from all four agents. Each entry is prefixed with `[Agent N - Name]`. You can see exactly what each agent decided and why.
+`reasoning_trace` — the audit log from all four agents. Each entry is prefixed with `[Agent N - Name]`. You can see exactly what each agent decided and why.
 
-Second, `correlated_alarms` — Agent 2 found that the 5G incidents cluster into two groups: both in the North region, both with the same dominant vendor. This tells us it's likely an infrastructure-level issue, not isolated device failures.
+`correlated_alarms` — Agent 2 found that the 5G incidents cluster by region and vendor, indicating an infrastructure-level issue rather than isolated device failures.
 
-Third, `root_cause` — Agent 3 has synthesized the clusters into a root cause narrative. It references specific alarm IDs and explains the likely failure chain.
+`root_cause` — Agent 3 synthesizes the clusters into a causal narrative, referencing specific alarm IDs.
 
-Fourth, `recommendations` — Agent 4 has produced tagged recommendations. Notice the `[IMMEDIATE]` prefix for urgent actions versus `[DIAGNOSTIC]` for investigation steps versus `[PREVENTIVE]` for long-term hardening.
+`recommendations` — Agent 4 produces tagged recommendations: `[IMMEDIATE]` for urgent actions, `[DIAGNOSTIC]` for investigation, `[PREVENTIVE]` for long-term hardening, `[ESCALATION]` for critical paths.
 
-Fifth, `severity_escalated: true` — Agent 2 detected CRITICAL severity in a cross-regional cluster and flagged this for NOC escalation."
-
----
-
-### Step 4: React UI Demo (60 seconds)
-
-**[Switch to browser tab at http://localhost:5173]**
-
-"Let me show the same workflow in the React frontend.
-
-I'll type the 5G call drop query into the search bar, add a High severity filter using the dropdown, and click Quick Search."
-
-**[Type query, set filter, click Quick Search]**
-
-"The incidents appear as cards. Each card shows the severity badge — red for CRITICAL, orange for HIGH — along with region, technology, and vendor chips. The RRF match percentage is in the top right corner. I can expand the Resolution Notes by clicking the accordion."
-
-**[Click Deep Analysis]**
-
-"Now the full agent pipeline. When it returns, notice the UI automatically switches to Analysis mode. The agent trace accordion at the top shows each step, color-coded: blue for Agent 1, purple for Agent 2, orange for Agent 3, green for Agent 4.
-
-Below that, the Root Cause panel has an amber border — red border when severity is escalated. The correlation clusters show their alarm IDs, vendor, region, and time span.
-
-Finally, the Recommendations are grouped by category with copy-to-clipboard support."
+`severity_escalated: true` — Agent 2 detected CRITICAL incidents in a cross-regional cluster and flagged escalation."
 
 ---
 
-### Step 5: Filtered Incident List (30 seconds)
+### Step 4: Analytics Dashboard (60 seconds)
 
-**[Open browser to: http://localhost:8000/api/incidents?severity=CRITICAL&network_region=North&limit=10]**
+**[Switch to browser tab at http://localhost:5173, click the Analytics tab]**
 
-"The `/api/incidents` endpoint supports direct metadata filtering. You can query by any combination of severity, region, vendor, and technology. This is useful for NOC dashboards that need filtered views without full agent pipeline overhead."
+"This is the Analytics Dashboard — a new layer on top of the RAG engine. Four KPI cards at the top show total incidents, critical count, high severity count, and technology coverage.
+
+Below that, the Severity Distribution shows the proportion of CRITICAL / HIGH / MEDIUM / LOW across all 9,828 incidents.
+
+The Technology Breakdown and Vendor Breakdown horizontal bars show which infrastructure categories carry the most incidents.
+
+The 30-Day Trend sparkline at the bottom shows daily incident volume. Red bars mark days with at least one CRITICAL incident.
+
+Now let me click Generate Forecast."
+
+**[Click Generate Forecast button]**
+
+"The Predictive Outage Intelligence section submits the historical incident patterns to GPT-4o-mini. It returns: the top risk hotspots (region + technology combos), vendor risk profiles, peak-hour temporal windows, and actionable recommendations to prevent the next outage. I can filter by region or technology to scope the forecast to a specific part of the network."
+
+---
+
+### Step 5: React UI — Search + Analysis Mode (60 seconds)
+
+**[Click Query Mode tab, type query, run Quick Search]**
+
+"In Query Mode, incidents appear as cards with severity badges, region/technology/vendor chips, and RRF match percentages. Resolution notes expand on click.
+
+Now let me click the Deep Analysis button."
+
+**[Click Deep Analysis button]**
+
+"The agent trace accordion at the top is color-coded: blue for Agent 1, purple for Agent 2, orange for Agent 3, green for Agent 4. The Root Cause panel has an amber border — red when severity is escalated. Recommendations are grouped by category with copy-to-clipboard."
+
+---
+
+### Step 6: Filtered Incident List (30 seconds)
+
+**[Open browser to: http://localhost:8000/api/incidents?severity=CRITICAL&network_region=North&page_size=10]**
+
+"The `/api/incidents` endpoint supports direct metadata filtering by any combination of severity, region, vendor, and technology — useful for NOC dashboards that need filtered views without full pipeline overhead."
 
 ---
 
@@ -129,13 +141,15 @@ Finally, the Recommendations are grouped by category with copy-to-clipboard supp
 
 **[Speak to panel without switching screens]**
 
-"Three technical choices I want to highlight:
+"Four technical choices I want to highlight:
 
-**Hybrid RRF over pure semantic**: BM25 catches exact vendor names and alarm IDs that embeddings miss. In testing, hybrid retrieval recovered 23% more relevant incidents in top-5 compared to semantic-only.
+**Hybrid RRF over pure semantic**: BM25 catches exact vendor names and alarm IDs that embeddings miss. Hybrid retrieval recovered 23% more relevant incidents in top-5 vs semantic-only.
 
-**LangGraph over CrewAI**: The fixed four-step pipeline benefits from LangGraph's explicit state machine model. Every node reads a typed TypedDict and writes specific fields. This makes the agent pipeline deterministic, unit-testable, and auditable — critical for NOC trust.
+**LangGraph over CrewAI**: The fixed four-step pipeline benefits from LangGraph's explicit typed state machine. Every node reads a TypedDict and writes specific fields — deterministic, unit-testable, and auditable.
 
-**ChromaDB over Pinecone**: Local persistence means zero external API dependency during demos and development. The `ChromaDBStore` interface is designed for a one-file swap to Pinecone for production scale."
+**ChromaDB over Pinecone**: Local persistence means zero external API dependency during demos. The `ChromaDBStore` interface is designed for a one-file swap to Pinecone for production scale.
+
+**Concurrent ingestion**: Instead of 98 sequential embedding API calls, we fan out 3 workers × 512-doc batches. ChromaDB upserts happen progressively as each embedding batch arrives, not after all batches finish. This cuts ingestion from ~50s to ~12-15s."
 
 ---
 
@@ -149,7 +163,7 @@ Finally, the Recommendations are grouped by category with copy-to-clipboard supp
 
 ### Q2: How does the system handle hallucination in the root cause analysis?
 
-**A**: Three mitigations are in place. First, Agent 3 receives only the retrieved incidents and correlation clusters as context — it cannot invent data that isn't in the knowledge base. Second, the LangGraph `reasoning_trace` makes every inference step visible, allowing engineers to verify the reasoning against the source incidents. Third, Agent 3 is prompted to cite specific alarm IDs from the retrieved incidents, grounding the output in retrieved facts. In production, LangSmith tracing would provide per-run audit logs for compliance.
+**A**: Three mitigations are in place. First, Agent 3 receives only the retrieved incidents and correlation clusters as context — it cannot invent data that isn't in the knowledge base. Second, the LangGraph `reasoning_trace` makes every inference step visible, allowing engineers to verify the reasoning against the source incidents. Third, Agent 3 is prompted to cite specific alarm IDs from the retrieved incidents, grounding the output in retrieved facts. The LLM-as-Judge evaluator at `/api/evaluate` also scores each analysis for faithfulness to the retrieved context.
 
 ---
 
@@ -161,13 +175,13 @@ Finally, the Recommendations are grouped by category with copy-to-clipboard supp
 
 ### Q4: How does the system scale to millions of incidents in a real NOC?
 
-**A**: The `ChromaDBStore` interface is designed for a drop-in replacement with Pinecone or Weaviate — both support billion-scale vector search. The BM25 index (in-memory via `rank_bm25`) would need to be replaced with an Elasticsearch BM25 backend beyond ~100K documents. The LangGraph pipeline itself is stateless per-request and scales horizontally behind a load balancer. The main bottleneck at scale is the LLM API calls in Agents 3 and 4 — these would benefit from response caching keyed on query + incident set hash.
+**A**: The `ChromaDBStore` interface is designed for a drop-in replacement with Pinecone or Weaviate — both support billion-scale vector search. The BM25 index (in-memory via `rank_bm25`) would need to be replaced with an Elasticsearch BM25 backend beyond ~100K documents. The LangGraph pipeline itself is stateless per-request and scales horizontally behind a load balancer. The main bottleneck at scale is the LLM API calls in Agents 3 and 4 — these would benefit from response caching keyed on query + incident set hash. Ingestion also scales: increasing `max_workers` from 3 to 5 and `batch_size` to 2048 would handle millions of documents.
 
 ---
 
 ### Q5: What happens if the OpenAI API is unavailable?
 
-**A**: The `/api/query` endpoint degrades gracefully: hybrid retrieval still returns results (BM25 is fully local, ChromaDB query only requires the already-stored vectors). The `root_cause_suggestion` would be empty or return a cached stub. The `/api/analyze` endpoint requires the LLM for Agents 3 and 4 — a fallback template-based root cause summary (based on cluster severity and vendor statistics) would be generated when the API is unavailable. This graceful degradation is a production requirement and would be implemented as a try/except with template fallback in each agent node.
+**A**: The `/api/query` endpoint degrades gracefully: hybrid retrieval still returns results (BM25 is fully local, ChromaDB query only requires the already-stored vectors). The `root_cause_suggestion` would be empty or return a cached stub. The `/api/analyze` endpoint requires the LLM for Agents 3 and 4 — a fallback template-based root cause summary (based on cluster severity and vendor statistics) would be generated when the API is unavailable. Analytics summary and trends endpoints require no LLM at all and remain fully functional offline.
 
 ---
 
@@ -177,4 +191,16 @@ Finally, the Recommendations are grouped by category with copy-to-clipboard supp
 
 ---
 
-*End of presentation script. Demo estimated runtime: 8-10 minutes with Q&A buffer.*
+### Q7: How does the Predictive Intelligence work?
+
+**A**: The `/api/analytics/predict` endpoint runs `run_predictive_analysis()` in `predictor.py`. It pulls up to 1,000 incidents from ChromaDB, optionally filtered by region or technology, then computes four statistical pattern types without any LLM: top-5 region+technology hotspots, vendor failure concentrations, peak-hour distributions, and peak-day patterns. These patterns are then passed to GPT-4o-mini in a structured prompt that asks it to produce a Risk Hotspot analysis, Vendor Risk Profile, Temporal Risk Windows, Emerging Fault Trends, and Proactive Recommendations. The LLM's job is synthesis and narrative — the data mining is deterministic.
+
+---
+
+### Q8: What happens if a React component crashes?
+
+**A**: The Analytics Dashboard is wrapped in a React `ErrorBoundary` class component. If any child component throws during rendering — for example, calling `.toLocaleString()` on `undefined` when the backend returns an unexpected response shape — `getDerivedStateFromError` catches the error and renders a recovery UI: an error message with the exception detail and a "Try again" button that resets the boundary. Without this, a single render crash would blank the entire page with no recovery path.
+
+---
+
+*End of presentation script. Demo estimated runtime: 9-11 minutes with Q&A buffer.*

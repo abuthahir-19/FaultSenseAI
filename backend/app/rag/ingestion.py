@@ -70,17 +70,28 @@ class IngestionPipeline:
                 "resolution_notes":     str(row["resolution_notes"])[:500],
             })
 
-        logger.info(f"Embedding {total} documents (batches of 100)...")
+        logger.info(f"Embedding {total} documents (concurrent, batch_size=512, workers=3)...")
         _progress("Generating embeddings", 2, 0, total)
 
         def _batch_cb(done: int, _total: int):
             _progress("Generating embeddings", 2, done, _total)
 
-        embeddings = self._embedder.embed_texts(documents, on_batch=_batch_cb)
+        def _store_cb(batch_idx: int, batch_embeddings: list, start: int, end: int):
+            self._store.add_documents_batch(
+                ids=ids[start:end],
+                embeddings=batch_embeddings,
+                documents=documents[start:end],
+                metadatas=metadatas[start:end],
+            )
 
+        embeddings = self._embedder.embed_texts_concurrent(
+            documents, on_batch=_batch_cb, on_store=_store_cb,
+            batch_size=512, max_workers=3,
+        )
+
+        # ChromaDB upserts completed progressively during embedding; just advance the step indicator
         _progress("Storing in ChromaDB", 3, total, total)
-        logger.info("Upserting into ChromaDB...")
-        self._store.add_documents(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
+        logger.info("ChromaDB upserts completed progressively during embedding.")
 
         _progress("Building BM25 index", 4, total, total)
         logger.info("Building BM25 index...")

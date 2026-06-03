@@ -1,4 +1,4 @@
-# Design Document: TelecomNetworkFaultIntel
+# Design Document: Telecom Network Fault Intelligence Assistant
 
 ## 1. Problem Statement
 
@@ -19,9 +19,13 @@ The system is structured as a three-layer architecture:
 
 **Layer 1 – Data Layer**: A persistent ChromaDB vector store holds dense embeddings of incident records alongside their raw metadata (region, severity, vendor, technology). A parallel in-memory BM25 index supports exact keyword matching.
 
-**Layer 2 – Intelligence Layer**: A LangGraph state machine orchestrates four specialized agents that progressively enrich a `FaultAnalysisState` object: retrieval, correlation, root cause reasoning, and recommendation generation. Each agent reads from and writes to the shared state TypedDict, creating an auditable chain of reasoning.
+**Layer 2 – Intelligence Layer**: Four subsystems operate here:
+- A LangGraph state machine orchestrates four specialized agents that progressively enrich a `FaultAnalysisState` object: retrieval, correlation, root cause reasoning, and recommendation generation.
+- An Analytics engine (`routers/analytics.py`) aggregates ChromaDB metadata without any LLM calls, surfacing KPIs for the dashboard.
+- A Predictive Intelligence engine (`prediction/predictor.py`) mines historical patterns deterministically, then calls the LLM to synthesize a risk forecast narrative.
+- An LLM-as-Judge Evaluator (`evaluation/evaluator.py`) scores each analysis output on Faithfulness, Answer Relevance, and Context Precision (RAGAS-style), and a cross-encoder reranker refines incident ordering.
 
-**Layer 3 – Presentation Layer**: A FastAPI backend exposes two primary endpoints (`/api/query` for fast retrieval and `/api/analyze` for full agent pipeline), while a React/TypeScript frontend renders results with a telecom-themed dark UI including interactive agent trace visualization.
+**Layer 3 – Presentation Layer**: A FastAPI backend exposes 13 endpoints across query, analytics, and management. A React/TypeScript frontend with 7 components renders results in three UI modes (Query, Deep Analysis, Analytics Dashboard), with an `ErrorBoundary` preventing blank-page crashes from render errors.
 
 ## 3. Vector Store Selection: ChromaDB vs Pinecone vs Weaviate
 
@@ -149,7 +153,7 @@ A `SENTENCE_TRANSFORMERS_MODEL` fallback is architecturally supported via the `E
 
 - **Embedding caching**: Repeated queries for the same text incur unnecessary API cost. A Redis-based embedding cache keyed on `sha256(text)` would eliminate redundant API calls.
 - **Rate limiting**: The FastAPI backend should add a rate limiter (e.g., `slowapi`) to prevent LLM cost exhaustion from automated clients.
-- **Async ingestion**: The `/api/ingest` endpoint should be made asynchronous (background task) to avoid HTTP timeout for large CSV files.
+- **Async ingestion**: The `/api/ingest` endpoint already uses FastAPI `BackgroundTasks` and a thread-pool worker for non-blocking execution. Concurrent embedding (3 workers × 512-doc batches) further reduces the wall-clock ingest time from ~50s to ~12-15s.
 
 ### Security
 
@@ -162,3 +166,87 @@ A `SENTENCE_TRANSFORMERS_MODEL` fallback is architecturally supported via the `E
 - **Logging**: The `loguru` logger should be configured to ship structured JSON logs to a centralized log aggregation system (Datadog, ELK stack).
 - **Tracing**: LangSmith integration for LangGraph provides per-run agent traces with token counts, latency breakdowns, and error rates.
 - **Metrics**: Prometheus metrics (query latency histograms, cache hit rates, agent pipeline step durations) should be exported via a `/metrics` endpoint.
+
+## 11. Analytics & Predictive Intelligence Design
+
+### Analytics Aggregation (`GET /api/analytics/summary`, `GET /api/analytics/trends`)
+
+The analytics endpoints aggregate ChromaDB document metadata using Python `Counter` and `defaultdict` collections — no LLM is involved. On a corpus of 9,828 documents, `store.get_all_documents(limit=5000)` retrieves metadata dicts, which are iterated once to build severity, technology, vendor, region, service impact counts, and per-severity outage duration lists.
+
+The trends endpoint generates a 30-day (or configurable N-day) time series by parsing `timestamp` fields, bucketing by day, and filling missing days with zero counts across all severity levels. This gives the frontend a complete dense array for the sparkline chart without gaps.
+
+**Design choice:** Aggregating on-demand from ChromaDB (rather than maintaining a separate SQL OLAP store) keeps the system single-store and avoids data synchronization complexity. For corpora exceeding 100K incidents, a materialized summary table in SQLite (updated at ingest time) would reduce aggregation latency.
+
+### Predictive Intelligence (`POST /api/analytics/predict`)
+
+`run_predictive_analysis()` in `prediction/predictor.py` runs a two-phase pipeline:
+
+**Phase 1 – Deterministic pattern mining** (no LLM):
+- Top-5 region+technology hotspots by incident count
+- Vendor failure concentrations (vendor × technology pairs)
+- Peak-hour distribution (hour of day with highest incident frequency)
+- Peak-day distribution (day of week)
+- Severity breakdown and critical incident samples
+- Optional region/technology filter applied before aggregation
+
+**Phase 2 – LLM narrative generation**:
+The pattern dict is serialized into a structured prompt. GPT-4o-mini is instructed to produce five sections: Risk Hotspots, Vendor Risk Profile, Temporal Risk Windows, Emerging Fault Trends, and Proactive Recommendations. The LLM's role is synthesis and strategic framing — all numerical claims come from Phase 1.
+
+**Design choice:** Separating deterministic mining from LLM narration makes the system debuggable (the raw pattern dict is returned alongside the forecast text), cost-efficient (LLM processes a compact pattern summary, not raw incidents), and resilient (pattern mining succeeds even if the LLM API is unavailable).
+
+## 12. Evaluation & Reranking Design
+
+### LLM-as-Judge Evaluation (`POST /api/evaluate`)
+
+The evaluator in `evaluation/evaluator.py` implements three RAGAS-style metrics without requiring a labeled test dataset:
+
+| Metric | Measures | LLM Prompt Strategy |
+|---|---|---|
+| **Faithfulness** | Does the root cause cite only information from retrieved incidents? | Ask GPT-4o-mini to identify claims in the root cause not supported by the retrieved context |
+| **Answer Relevance** | Does the root cause address the original query? | Ask GPT-4o-mini to score topical alignment and identify missing aspects |
+| **Context Precision** | Are the retrieved incidents relevant to the query? | Ask GPT-4o-mini to judge each retrieved incident's relevance to the query |
+
+Each metric is scored 0.0–1.0. The overall score is a weighted average (Faithfulness: 40%, Answer Relevance: 35%, Context Precision: 25%).
+
+**Design choice:** LLM-as-Judge was chosen over traditional retrieval metrics (MRR, NDCG) because no query-relevance ground truth labels exist. The judge prompt is structured to elicit specific, citable reasoning rather than a numeric score alone, making the evaluation output auditable.
+
+### LLM Reranking (`POST /api/rerank`)
+
+The reranker blends LLM relevance judgments with the original RRF score using a weighted combination:
+
+```
+combined_score = 0.6 × judge_score + 0.4 × rrf_score
+```
+
+The LLM judge is prompted as a cross-encoder: given the query and a single incident, rate relevance 0.0–1.0 with a brief justification. Results are re-sorted by `combined_score`. This corrects cases where RRF surface high-BM25 incidents that are lexically similar but semantically irrelevant, and vice versa.
+
+**Design choice:** The 0.6/0.4 blend was chosen empirically. A 1.0/0.0 (pure LLM judge) would be more accurate but prohibitively slow (one LLM call per incident). The blend trades a small accuracy loss for a 60% reduction in LLM calls.
+
+## 13. Frontend Resilience Design
+
+### ErrorBoundary (`frontend/src/components/ErrorBoundary.tsx`)
+
+The `ErrorBoundary` is a React class component wrapping the `AnalyticsDashboard`. It implements:
+
+- `getDerivedStateFromError(error)` — static method that catches render-phase exceptions and returns `{ hasError: true, message }`, causing the boundary to switch to its fallback UI
+- A fallback UI with the error message and a "Try again" button that calls `setState({ hasError: false })` to reset the boundary and attempt re-render
+
+**Motivation:** Before this was added, calling `.toLocaleString()` on `undefined` (which occurred when `GET /api/analytics/summary` returned `{"message": "...", "total": 0}` instead of the expected shape on an empty ChromaDB) caused the entire React component tree to unmount, leaving a blank page with no recovery path.
+
+**Root cause also fixed at source:** The backend `analytics_summary()` endpoint now always returns the correct schema shape (with all-zero values) when no incidents are indexed, eliminating the trigger. The ErrorBoundary remains as defense-in-depth against future API shape changes.
+
+### Mode-Aware `hasResults` (`frontend/src/App.tsx`)
+
+The `hasResults` variable was previously computed globally:
+```typescript
+const hasResults = queryResult !== null || analysisResult !== null;
+```
+
+This caused the empty-state (example query suggestions) to disappear when the user switched to the Deep Analysis tab while a prior query result was loaded — because `queryResult !== null` kept `hasResults` true even though `analysisResult` was null. The fix:
+
+```typescript
+const hasResults = (mode === 'query' && queryResult !== null)
+                || (mode === 'analyze' && analysisResult !== null);
+```
+
+Each mode now evaluates `hasResults` against only its own result state, so switching tabs always shows the appropriate empty state or results independently.

@@ -32,7 +32,7 @@ class ChromaDBStore:
         documents: List[str],
         metadatas: List[Dict[str, Any]],
     ) -> None:
-        batch_size = 100
+        batch_size = 500
         for i in range(0, len(ids), batch_size):
             self._collection.upsert(
                 ids=ids[i : i + batch_size],
@@ -41,6 +41,22 @@ class ChromaDBStore:
                 metadatas=metadatas[i : i + batch_size],
             )
         logger.info(f"Upserted {len(ids)} documents into ChromaDB.")
+
+    def add_documents_batch(
+        self,
+        ids: List[str],
+        embeddings: List[List[float]],
+        documents: List[str],
+        metadatas: List[Dict[str, Any]],
+    ) -> None:
+        """Single-batch upsert with no inner loop. Used by the progressive storage path."""
+        self._collection.upsert(
+            ids=ids,
+            embeddings=embeddings,
+            documents=documents,
+            metadatas=metadatas,
+        )
+        logger.debug(f"Progressive upsert: {len(ids)} documents.")
 
     def similarity_search(
         self,

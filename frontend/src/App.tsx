@@ -6,6 +6,7 @@ import AgentTrace from './components/AgentTrace';
 import RootCausePanel from './components/RootCausePanel';
 import RecommendationList from './components/RecommendationList';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
+import ErrorBoundary from './components/ErrorBoundary';
 import { getHealth, triggerIngest, getIngestStatus } from './api/client';
 import type { QueryResponse, AnalysisResponse, AppMode } from './types';
 import type { IngestStatus } from './api/client';
@@ -97,7 +98,7 @@ const App: React.FC = () => {
     }
   };
 
-  const hasResults = queryResult !== null || analysisResult !== null;
+  const hasResults = (mode === 'query' && queryResult !== null) || (mode === 'analyze' && analysisResult !== null);
   const incidents = mode === 'query' ? (queryResult?.incidents ?? []) : (analysisResult?.retrieved_incidents ?? []);
 
   return (
@@ -236,7 +237,11 @@ const App: React.FC = () => {
         </div>
 
         {/* Analytics Dashboard tab */}
-        {mode === 'dashboard' && <AnalyticsDashboard />}
+        {mode === 'dashboard' && (
+          <ErrorBoundary fallbackLabel="Analytics failed to load">
+            <AnalyticsDashboard />
+          </ErrorBoundary>
+        )}
 
         {/* Query input */}
         {mode !== 'dashboard' && (
