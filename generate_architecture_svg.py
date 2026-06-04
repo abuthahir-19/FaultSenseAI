@@ -1,31 +1,32 @@
 """
-Generates ARCHITECTURE_DIAGRAM.svg — light theme.
+Generates ARCHITECTURE_DIAGRAM.svg — presentation-friendly, dual-audience design.
+Plain English labels for non-tech stakeholders; tech subtitles for engineers.
 Run: python generate_architecture_svg.py
 """
 import os, html as _html
 
 def xe(s): return _html.escape(str(s), quote=False)
 
-OUT  = os.path.join(os.path.dirname(__file__), "ARCHITECTURE_DIAGRAM.svg")
-W    = 1160
+OUT = os.path.join(os.path.dirname(__file__), "ARCHITECTURE_DIAGRAM.svg")
+W   = 1180
 
-# ── Light-theme palette ───────────────────────────────────────────────────────
-BG       = "#F8FAFC"
-BORDER   = "#E2E8F0"
-DARK     = "#0F172A"
-MID      = "#334155"
-FAINT    = "#94A3B8"
-WHITE    = "#FFFFFF"
+# ── Palette ───────────────────────────────────────────────────────────────────
+BG     = "#F8FAFC"
+BORDER = "#E2E8F0"
+DARK   = "#0F172A"
+MID    = "#334155"
+FAINT  = "#94A3B8"
+WHITE  = "#FFFFFF"
 
-# Per-tier  (fill, border/accent, header-text, chip-fill, chip-text, sub-text)
-FE  = dict(f="#EFF6FF", s="#2563EB", ht=WHITE, cf="#DBEAFE", ct="#1D4ED8", st="#1E40AF")
-BE  = dict(f="#F0FDF4", s="#16A34A", ht=WHITE, cf="#DCFCE7", ct="#15803D", st="#14532D")
-RAG = dict(f="#FFFBEB", s="#D97706", ht=WHITE, cf="#FEF3C7", ct="#92400E", st="#B45309")
-LG  = dict(f="#F5F3FF", s="#7C3AED", ht=WHITE, cf="#EDE9FE", ct="#5B21B6", st="#6D28D9")
-ST  = dict(f="#F1F5F9", s="#64748B", ht=WHITE, cf="#E2E8F0", ct="#334155", st="#475569")
-OAI = dict(f="#EEF2FF", s="#4F46E5", ht=WHITE, cf="#E0E7FF", ct="#3730A3", st="#4338CA")
-LS  = dict(f="#F0FDF4", s="#16A34A", ht=WHITE, cf="#DCFCE7", ct="#15803D", st="#14532D")
-DE  = dict(f="#FEF2F2", s="#DC2626", ht=WHITE, cf="#FEE2E2", ct="#991B1B", st="#B91C1C")
+# Per-tier: (fill, accent, chip-fill, chip-text, sub-text)
+FE  = dict(f="#EFF6FF", s="#2563EB", cf="#DBEAFE", ct="#1D4ED8", st="#3B82F6")
+BE  = dict(f="#F0FDF4", s="#16A34A", cf="#DCFCE7", ct="#15803D", st="#22C55E")
+RAG = dict(f="#FFFBEB", s="#D97706", cf="#FEF3C7", ct="#92400E", st="#F59E0B")
+LG  = dict(f="#F5F3FF", s="#7C3AED", cf="#EDE9FE", ct="#5B21B6", st="#8B5CF6")
+ST  = dict(f="#F1F5F9", s="#64748B", cf="#E2E8F0", ct="#334155", st="#64748B")
+OAI = dict(f="#EEF2FF", s="#4F46E5", cf="#E0E7FF", ct="#3730A3", st="#6366F1")
+LS  = dict(f="#ECFDF5", s="#059669", cf="#D1FAE5", ct="#065F46", st="#10B981")
+DE  = dict(f="#FEF2F2", s="#DC2626", cf="#FEE2E2", ct="#991B1B", st="#EF4444")
 
 FONT = "'Segoe UI', -apple-system, 'Inter', sans-serif"
 
@@ -37,10 +38,11 @@ def rect(x, y, w, h, fill, stroke, rx=10, sw=1.5, filt=""):
             f'fill="{fill}" stroke="{stroke}" stroke-width="{sw}"{f}/>')
 
 def txt(x, y, content, size=11, fill=DARK, weight="normal",
-        anchor="middle", family=FONT):
+        anchor="middle", family=FONT, italic=False):
+    style = "italic" if italic else "normal"
     return (f'<text x="{x}" y="{y}" font-family="{family}" font-size="{size}" '
-            f'font-weight="{weight}" fill="{fill}" text-anchor="{anchor}" '
-            f'dominant-baseline="central">{xe(content)}</text>')
+            f'font-weight="{weight}" font-style="{style}" fill="{fill}" '
+            f'text-anchor="{anchor}" dominant-baseline="central">{xe(content)}</text>')
 
 def line(x1, y1, x2, y2, stroke=FAINT, sw=1.8, dash="", marker="url(#arr)"):
     d = f'stroke-dasharray="{dash}"' if dash else ""
@@ -52,381 +54,423 @@ def path(d, stroke=FAINT, sw=1.8, dash="", fill="none", marker="url(#arr)"):
     return (f'<path d="{d}" fill="{fill}" stroke="{stroke}" stroke-width="{sw}" '
             f'{da} marker-end="{marker}" stroke-linecap="round" stroke-linejoin="round"/>')
 
-def arrow_lbl(x, y, label, color=MID, size=8.5):
-    pad = len(label) * 3.3 + 6
-    return (f'<rect x="{x-pad}" y="{y-9}" width="{pad*2}" height="17" '
-            f'rx="4" fill="{WHITE}" stroke="{BORDER}" stroke-width="1"/>'
-            f'<text x="{x}" y="{y}" font-family="{FONT}" font-size="{size}" '
+def flow_label(x, y, label, color=MID):
+    pad = len(label) * 3.5 + 8
+    return (f'<rect x="{x-pad}" y="{y-10}" width="{pad*2}" height="20" '
+            f'rx="5" fill="{WHITE}" stroke="{BORDER}" stroke-width="1"/>'
+            f'<text x="{x}" y="{y}" font-family="{FONT}" font-size="8.5" '
             f'fill="{color}" text-anchor="middle" dominant-baseline="central"'
             f' font-weight="500">{xe(label)}</text>')
 
-def chip(x, y, label, t, size=8.5, w=None):
-    cw = w or (len(label)*5.8 + 14)
-    return (f'<rect x="{x}" y="{y-9}" width="{cw}" height="18" rx="9" '
-            f'fill="{t["cf"]}" stroke="{t["s"]}" stroke-width="1"/>'
-            f'<text x="{x+cw/2}" y="{y}" font-family="{FONT}" font-size="{size}" '
-            f'fill="{t["ct"]}" font-weight="600" text-anchor="middle" '
+def tier_header(x, y, w, num, label, t):
+    s  = rect(x, y, w, 38, t["s"], t["s"], rx=10, sw=0)
+    s += rect(x, y+26, w, 12, t["s"], t["s"], rx=0, sw=0)
+    s += txt(x + w//2 + 14, y+19, label, size=12, fill=WHITE, weight="bold")
+    s += (f'<circle cx="{x+19}" cy="{y+19}" r="13" fill="{WHITE}" opacity="0.25"/>'
+          f'<text x="{x+19}" y="{y+19}" font-family="{FONT}" font-size="12" '
+          f'font-weight="bold" fill="{WHITE}" text-anchor="middle" '
+          f'dominant-baseline="central">{xe(num)}</text>')
+    return s
+
+def tech_tag(x, y, label, t):
+    cw = len(label) * 5.6 + 12
+    return (f'<rect x="{x}" y="{y-8}" width="{cw}" height="16" rx="4" '
+            f'fill="{t["cf"]}" stroke="{t["s"]}" stroke-width="0.8" opacity="0.7"/>'
+            f'<text x="{x+cw/2}" y="{y}" font-family="{FONT}" font-size="7.5" '
+            f'fill="{t["ct"]}" font-weight="500" text-anchor="middle" '
             f'dominant-baseline="central">{xe(label)}</text>')
 
-def chip_row(sx, y, labels, t, gap=5, size=8.5):
+def tech_tags_row(sx, y, labels, t, gap=4):
     out, cx = "", sx
     for l in labels:
-        cw = len(l)*5.8 + 14
-        out += chip(cx, y, l, t, size=size, w=cw)
+        cw = len(l) * 5.6 + 12
+        out += tech_tag(cx, y, l, t)
         cx += cw + gap
     return out
 
-def section_badge(x, y, num, t):
-    """Numbered circle badge top-left of each section."""
-    return (f'<circle cx="{x}" cy="{y}" r="13" fill="{t["s"]}"/>'
-            f'<text x="{x}" y="{y}" font-family="{FONT}" font-size="11" '
-            f'font-weight="bold" fill="{WHITE}" text-anchor="middle" '
-            f'dominant-baseline="central">{xe(num)}</text>')
-
-def tier_header(x, y, w, num, label, t):
-    """Coloured header stripe with section number badge."""
-    s  = rect(x, y, w, 36, t["s"], t["s"], rx=10, sw=0)
-    s += rect(x, y+24, w, 12, t["s"], t["s"], rx=0, sw=0)
-    s += txt(x + w//2 + 10, y+18, label,
-             size=11, fill=WHITE, weight="bold")
-    s += section_badge(x+18, y+18, num, t)
-    return s
-
-def comp_row(x, y, w, icon, name, desc, t):
-    """Single component row inside a tier box."""
-    s  = rect(x, y-13, w, 27, t["cf"], t["s"], rx=7, sw=1)
-    s += txt(x+14, y, icon, size=13, fill=t["ct"], anchor="start")
-    s += txt(x+36, y-5, name, size=9, fill=t["ct"],
-             weight="bold", anchor="start")
-    s += txt(x+36, y+7, desc, size=7.5, fill=t["st"], anchor="start")
+def step_row(x, y, w, num, plain_name, plain_desc, tech_hint, t):
+    """A pipeline step row with: number badge, plain name, description, tech hint."""
+    s  = rect(x, y-16, w, 34, t["cf"], t["s"], rx=8, sw=1)
+    # Step number badge
+    s += (f'<circle cx="{x+18}" cy="{y+1}" r="11" fill="{t["s"]}"/>'
+          f'<text x="{x+18}" y="{y+1}" font-family="{FONT}" font-size="9" '
+          f'font-weight="bold" fill="{WHITE}" text-anchor="middle" '
+          f'dominant-baseline="central">{xe(num)}</text>')
+    s += txt(x+36, y-5, plain_name, size=9.5, fill=t["ct"], weight="bold", anchor="start")
+    s += txt(x+36, y+7, plain_desc, size=8,   fill=t["st"], anchor="start")
+    # Tech hint on the right
+    hint_x = x + w - 8
+    s += txt(hint_x, y+1, tech_hint, size=7, fill=FAINT, anchor="end", italic=True)
     return s
 
 
-# ── Layout constants ──────────────────────────────────────────────────────────
-MX, MW = 55, 790     # main column  x, width
-RX, RW = 875, 245    # right column x, width
-MC     = MX + MW//2  # main column centre x
+# ── Layout ────────────────────────────────────────────────────────────────────
+MX, MW = 55, 790
+RX, RW = 875, 255
+MC     = MX + MW//2   # main column centre
 
 parts = []
 
-# ── Defs: arrow marker + drop shadow ─────────────────────────────────────────
+# ── Defs ──────────────────────────────────────────────────────────────────────
 parts.append("""<defs>
   <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5"
           markerWidth="6" markerHeight="6" orient="auto-start-reverse">
     <path d="M1 2 L8 5 L1 8" fill="none" stroke="context-stroke"
           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
   </marker>
-  <filter id="sh" x="-4%" y="-4%" width="108%" height="112%">
-    <feDropShadow dx="0" dy="2" stdDeviation="4"
-                  flood-color="#0F172A" flood-opacity="0.08"/>
-  </filter>
-  <filter id="shSm" x="-4%" y="-4%" width="108%" height="115%">
-    <feDropShadow dx="0" dy="1" stdDeviation="2"
+  <filter id="sh" x="-4%" y="-4%" width="108%" height="115%">
+    <feDropShadow dx="0" dy="2" stdDeviation="5"
                   flood-color="#0F172A" flood-opacity="0.07"/>
+  </filter>
+  <filter id="shSm" x="-5%" y="-5%" width="110%" height="120%">
+    <feDropShadow dx="0" dy="1" stdDeviation="3"
+                  flood-color="#0F172A" flood-opacity="0.06"/>
   </filter>
 </defs>""")
 
 # ── Background ────────────────────────────────────────────────────────────────
 parts.append(f'<rect width="{W}" height="2000" fill="{BG}"/>')
 
-# ── Title — centred on the full canvas width (W//2), not just the main column ──
-TT_Y  = 28
-TC    = W // 2   # true canvas centre
-parts.append(txt(TC, TT_Y,
-                 "FaultSense AI — Telecom Network Fault Intelligence",
-                 size=20, fill=DARK, weight="bold"))
-parts.append(txt(TC, TT_Y+26,
-                 "System Architecture  ·  RAG + LangGraph Multi-Agent Pipeline  ·  "
-                 "Python / FastAPI / React / ChromaDB / OpenAI",
-                 size=10, fill=FAINT))
-parts.append(f'<line x1="{MX}" y1="{TT_Y+42}" x2="{RX+RW}" y2="{TT_Y+42}" '
+# ── Title ─────────────────────────────────────────────────────────────────────
+TC = W // 2
+parts.append(txt(TC, 30, "FaultSense AI — How It Works",
+                 size=22, fill=DARK, weight="bold"))
+parts.append(txt(TC, 56,
+                 "From a plain-English question to a diagnosed root cause and fix — in seconds",
+                 size=11, fill=MID))
+parts.append(txt(TC, 74,
+                 "Telecom Network Fault Intelligence  ·  AI-Powered  ·  2026",
+                 size=9, fill=FAINT))
+parts.append(f'<line x1="{MX}" y1="88" x2="{RX+RW}" y2="88" '
              f'stroke="{BORDER}" stroke-width="1.5"/>')
 
 # ── User bubble ───────────────────────────────────────────────────────────────
-UY = TT_Y + 74
-parts.append(f'<ellipse cx="{MC}" cy="{UY}" rx="118" ry="28" '
-             f'fill="{WHITE}" stroke="{BORDER}" stroke-width="1.5" filter="url(#shSm)"/>')
-# user icon (simple SVG person)
-ux = MC - 82
-parts.append(f'<circle cx="{ux}" cy="{UY-6}" r="8" fill="{FE["s"]}" opacity="0.18"/>')
-parts.append(f'<circle cx="{ux}" cy="{UY-8}" r="5" fill="{FE["s"]}"/>')
-parts.append(f'<path d="M {ux-8} {UY+4} Q {ux} {UY-2} {ux+8} {UY+4}" '
-             f'fill="none" stroke="{FE["s"]}" stroke-width="2" stroke-linecap="round"/>')
-parts.append(txt(MC+6, UY-6, "User / NOC Engineer",
-                 size=12, fill=DARK, weight="600"))
-parts.append(txt(MC+6, UY+8, "Natural language fault query",
+UY = 122
+# Pill-shaped user card
+parts.append(rect(MC-140, UY-30, 280, 58, WHITE, BORDER, rx=14, sw=1.5, filt="url(#shSm)"))
+# Person icon
+ux = MC - 108
+parts.append(f'<circle cx="{ux}" cy="{UY-8}" r="6" fill="{FE["s"]}"/>')
+parts.append(f'<path d="M {ux-9} {UY+10} Q {ux} {UY+2} {ux+9} {UY+10}" '
+             f'fill="none" stroke="{FE["s"]}" stroke-width="2.2" stroke-linecap="round"/>')
+parts.append(txt(MC+2, UY-8, "Network Operations Engineer",
+                 size=12, fill=DARK, weight="700"))
+parts.append(txt(MC+2, UY+10, "Types a question in plain English — no commands, no code",
                  size=9, fill=FAINT))
 
-# arrow down
-parts.append(line(MC, UY+28, MC, UY+52, stroke=FE["s"], sw=2))
+# Down arrow with label
+parts.append(line(MC, UY+28, MC, UY+56, stroke=FE["s"], sw=2.2))
+parts.append(flow_label(MC, UY+42, "Asks a question", FE["s"]))
 
-# ═════════════════════════════════════════════════════════════════════════════
-# 1.  REACT FRONTEND
-# ═════════════════════════════════════════════════════════════════════════════
-FY, FH = UY+54, 142
-parts.append(rect(MX, FY, MW, FH, FE["f"], FE["s"], rx=10, filt="url(#sh)"))
-parts.append(tier_header(MX, FY, MW, "1",
-    "React Frontend   ·   Vite + TypeScript + TailwindCSS   ·   Port 5173", FE))
 
-chips_r1 = ["🏠 App.tsx", "🔎 QueryInput", "📋 IncidentCard",
-            "🔬 AgentTrace", "🎯 RootCausePanel"]
-chips_r2 = ["✅ Recommendations", "📊 AnalyticsDashboard",
-            "📋 EvaluationPanel", "🛡 GuardrailPanel", "🚨 ErrorBoundary"]
-parts.append(chip_row(MX+12, FY+62, chips_r1, FE))
-parts.append(chip_row(MX+12, FY+92, chips_r2, FE))
-parts.append(txt(MX+8, FY+121, "axios  ·  TailwindCSS v3  ·  Lucide React Icons  ·  React 18  ·  TypeScript",
-                 size=8, fill=FE["st"], anchor="start"))
+# =============================================================================
+# 1. WEB DASHBOARD  (React Frontend)
+# =============================================================================
+FY, FH = UY+58, 128
+parts.append(rect(MX, FY, MW, FH, FE["f"], FE["s"], rx=12, filt="url(#sh)"))
+parts.append(tier_header(MX, FY, MW, "1", "Web Dashboard", FE))
 
-# arrow Frontend → Backend
+parts.append(txt(MX+16, FY+56, "Where engineers type questions and see the full diagnosis — charts, root cause, and step-by-step fix recommendations",
+                 size=9.5, fill=MID, anchor="start"))
+
+# Plain feature chips
+features_fe = ["Ask a question", "View incident cards", "See AI reasoning steps",
+                "Root cause panel", "Fix recommendations", "Analytics dashboard"]
+cx, cy = MX+16, FY+82
+for feat in features_fe:
+    cw = len(feat)*6.2 + 16
+    parts.append(rect(cx, cy-10, cw, 20, FE["cf"], FE["s"], rx=10, sw=0.8))
+    parts.append(txt(cx+cw/2, cy, feat, size=8.5, fill=FE["ct"], weight="600"))
+    cx += cw + 6
+    if cx > MX+MW-100:
+        cx, cy = MX+16, cy+26
+
+parts.append(tech_tags_row(MX+16, FY+FH-14, ["React 18", "TypeScript", "Vite", "TailwindCSS"], FE))
+
+# Arrow down
 A1Y = FY + FH
-parts.append(line(MC, A1Y, MC, A1Y+30, stroke=FE["s"], sw=2.5))
-parts.append(arrow_lbl(MC, A1Y+15, "HTTP POST  ·  axios  ·  JSON", FE["s"]))
+parts.append(line(MC, A1Y, MC, A1Y+32, stroke=FE["s"], sw=2.5))
+parts.append(flow_label(MC, A1Y+16, "Sends the question to the backend", FE["s"]))
 
-# ═════════════════════════════════════════════════════════════════════════════
-# 2.  FASTAPI BACKEND
-# ═════════════════════════════════════════════════════════════════════════════
-BY, BH = A1Y+32, 140
-parts.append(rect(MX, BY, MW, BH, BE["f"], BE["s"], rx=10, filt="url(#sh)"))
-parts.append(tier_header(MX, BY, MW, "2",
-    "FastAPI Backend   ·   Uvicorn   ·   Port 8000", BE))
 
-ep1 = ["🔎 POST /query", "🧠 POST /analyze",
-       "📥 POST/GET /ingest", "💚 GET /health"]
-ep2 = ["📈 GET/POST /analytics/*", "📝 POST /summarize",
-       "🧪 POST /evaluate", "📡 GET /ingest/status"]
-parts.append(chip_row(MX+12, BY+60, ep1, BE))
-parts.append(chip_row(MX+12, BY+90, ep2, BE))
-parts.append(txt(MX+8, BY+119,
-                 "pydantic-settings  ·  loguru  ·  LangSmith tracing  ·  Python 3.11+",
-                 size=8, fill=BE["st"], anchor="start"))
+# =============================================================================
+# 2. PROCESSING ENGINE  (FastAPI Backend)
+# =============================================================================
+BY, BH = A1Y+34, 118
+parts.append(rect(MX, BY, MW, BH, BE["f"], BE["s"], rx=12, filt="url(#sh)"))
+parts.append(tier_header(MX, BY, MW, "2", "Processing Engine", BE))
 
-# ── fork: Backend → RAG  and  Backend → LangGraph ────────────────────────────
-TY = BY + BH + 40
-RAG_X, RAG_W = MX, 375
-LG_X,  LG_W  = MX+395, 395
-TH = 205
+parts.append(txt(MX+16, BY+54, "The brain of the system — receives questions, coordinates the AI agents, and sends the answer back to the dashboard",
+                 size=9.5, fill=MID, anchor="start"))
 
-fork_y = BY + BH + 18
+# What it handles
+handles = ["Receive questions", "Coordinate AI agents", "Load historical data",
+           "Return diagnosis", "Track performance", "Quality evaluation"]
+cx, cy = MX+16, BY+80
+for h in handles:
+    cw = len(h)*6.2 + 16
+    parts.append(rect(cx, cy-10, cw, 20, BE["cf"], BE["s"], rx=10, sw=0.8))
+    parts.append(txt(cx+cw/2, cy, h, size=8.5, fill=BE["ct"], weight="600"))
+    cx += cw + 6
+
+parts.append(tech_tags_row(MX+16, BY+BH-14, ["Python 3.11", "FastAPI", "Uvicorn", "Pydantic"], BE))
+
+
+# ── Fork: Processing Engine → Knowledge Search + AI Analysis ─────────────────
+fork_y = BY + BH + 20
+RAG_X, RAG_W = MX, 378
+LG_X,  LG_W  = MX+400, 390
+TY = BY + BH + 46
+
 parts.append(path(f"M {MC} {BY+BH} L {MC} {fork_y} "
                   f"L {RAG_X+RAG_W//2} {fork_y} L {RAG_X+RAG_W//2} {TY}",
                   stroke=RAG["s"], sw=2))
 parts.append(path(f"M {MC} {BY+BH} L {MC} {fork_y} "
                   f"L {LG_X+LG_W//2} {fork_y} L {LG_X+LG_W//2} {TY}",
                   stroke=LG["s"], sw=2))
-parts.append(arrow_lbl(RAG_X+RAG_W//2 - 68, fork_y, "Quick RAG", RAG["s"]))
-parts.append(arrow_lbl(LG_X+LG_W//2  + 72, fork_y, "LangGraph invoke", LG["s"]))
+parts.append(flow_label(RAG_X+RAG_W//2 - 62, fork_y, "Search past incidents", RAG["s"]))
+parts.append(flow_label(LG_X+LG_W//2  + 66, fork_y, "Run AI agent pipeline", LG["s"]))
 
-# ═════════════════════════════════════════════════════════════════════════════
-# 3.  RAG PIPELINE
-# ═════════════════════════════════════════════════════════════════════════════
-parts.append(rect(RAG_X, TY, RAG_W, TH, RAG["f"], RAG["s"], rx=10, filt="url(#sh)"))
-parts.append(tier_header(RAG_X, TY, RAG_W, "3", "RAG Pipeline", RAG))
 
-rag_items = [
-    ("🧮", "EmbeddingManager",
-     "text-embedding-3-small  ·  3 workers  ·  batch 512"),
-    ("💾", "ChromaDBStore",
-     "Semantic vector search  ·  metadata filters"),
-    ("📑", "BM25Index",
-     "Keyword search  ·  rank_bm25"),
-    ("🔀", "HybridRetriever",
-     "RRF fusion  ·  score = 1/(rank + 60)"),
+# =============================================================================
+# 3. KNOWLEDGE SEARCH  (RAG Pipeline)
+# =============================================================================
+TH_RAG = 192
+parts.append(rect(RAG_X, TY, RAG_W, TH_RAG, RAG["f"], RAG["s"], rx=12, filt="url(#sh)"))
+parts.append(tier_header(RAG_X, TY, RAG_W, "3", "Knowledge Search", RAG))
+
+parts.append(txt(RAG_X+16, TY+52, "Searches 9,800+ real telecom incidents",
+                 size=9.5, fill=MID, anchor="start", weight="600"))
+parts.append(txt(RAG_X+16, TY+67, "to find the most relevant past cases",
+                 size=9, fill=FAINT, anchor="start"))
+
+rag_steps = [
+    ("A", "Convert question to AI format",
+     "Makes it possible to compare against all stored cases",
+     "text-embedding-3-small"),
+    ("B", "Search by meaning",
+     "Finds incidents with similar context, even if words differ",
+     "ChromaDB vector store"),
+    ("C", "Search by keywords",
+     "Finds exact keyword matches across incident descriptions",
+     "BM25 full-text index"),
+    ("D", "Combine & rank results",
+     "Merges both searches to surface the best matches",
+     "Hybrid RRF fusion"),
 ]
-for i, (icon, name, desc) in enumerate(rag_items):
-    parts.append(comp_row(RAG_X+10, TY+57+i*38, RAG_W-20,
-                          icon, name, desc, RAG))
+for i, (num, name, desc, hint) in enumerate(rag_steps):
+    parts.append(step_row(RAG_X+10, TY+100+i*36, RAG_W-20, num, name, desc, hint, RAG))
 
-# ═════════════════════════════════════════════════════════════════════════════
-# 4.  LANGGRAPH AGENT PIPELINE
-# ═════════════════════════════════════════════════════════════════════════════
-parts.append(rect(LG_X, TY, LG_W, TH, LG["f"], LG["s"], rx=10, filt="url(#sh)"))
-parts.append(tier_header(LG_X, TY, LG_W, "4", "LangGraph Agent Pipeline", LG))
 
-lg_items = [
-    ("🛡",  "Guardrail",
-     "Keyword check  ·  LLM injection detection"),
-    ("🔍",  "Agent 1 — Retrieval",
-     "HybridRetriever.search()  ·  RRF fusion"),
-    ("🔗",  "Agent 2 — Correlation",
-     "Cluster by region + technology + time window"),
-    ("🎯",  "Agent 3 — Root Cause",
-     "GPT-4o-mini chain-of-thought reasoning"),
-    ("💡",  "Agent 4 — Recommendations",
-     "Structured output  ·  categorised action steps"),
+# =============================================================================
+# 4. AI ANALYSIS PIPELINE  (LangGraph Multi-Agent)
+# =============================================================================
+TH_LG = 224
+parts.append(rect(LG_X, TY, LG_W, TH_LG, LG["f"], LG["s"], rx=12, filt="url(#sh)"))
+parts.append(tier_header(LG_X, TY, LG_W, "4", "AI Analysis Pipeline", LG))
+
+parts.append(txt(LG_X+16, TY+52, "4 AI agents work in sequence — each agent",
+                 size=9.5, fill=MID, anchor="start", weight="600"))
+parts.append(txt(LG_X+16, TY+67, "hands its findings to the next, like a relay team",
+                 size=9, fill=FAINT, anchor="start"))
+
+lg_steps = [
+    ("1", "Safety Check",
+     "Blocks harmful or irrelevant questions before they go further",
+     "Guardrail agent"),
+    ("2", "Find Similar Cases",
+     "Retrieves the most relevant past incidents from the knowledge base",
+     "Retrieval agent"),
+    ("3", "Spot Patterns",
+     "Groups incidents by location, network type, and timing to find clusters",
+     "Correlation agent"),
+    ("4", "Identify Root Cause",
+     "Reasons through the evidence to pinpoint what actually went wrong",
+     "Root-cause agent · GPT-4o"),
+    ("5", "Suggest Fixes",
+     "Produces clear, prioritised action steps the team can act on immediately",
+     "Recommendations agent"),
 ]
-for i, (icon, name, desc) in enumerate(lg_items):
-    parts.append(comp_row(LG_X+10, TY+52+i*30, LG_W-20,
-                          icon, name, desc, LG))
+for i, (num, name, desc, hint) in enumerate(lg_steps):
+    parts.append(step_row(LG_X+10, TY+99+i*30, LG_W-20, num, name, desc, hint, LG))
 
-# dashed cross-arrow RAG → LangGraph
-MID_Y = TY + TH//2 + 10
-parts.append(line(RAG_X+RAG_W, MID_Y, LG_X, MID_Y,
+# Dashed cross-arrow: Knowledge Search feeds AI Pipeline
+mid_y = TY + max(TH_RAG, TH_LG)//2 - 10
+parts.append(line(RAG_X+RAG_W, mid_y, LG_X, mid_y,
                   stroke=LG["s"], sw=1.5, dash="6 4"))
-parts.append(arrow_lbl((RAG_X+RAG_W+LG_X)//2, MID_Y-14,
-                        "HybridRetriever.search()", LG["s"]))
+parts.append(flow_label((RAG_X+RAG_W+LG_X)//2, mid_y-14,
+                         "Relevant cases passed to agents", LG["s"]))
 
-# ═════════════════════════════════════════════════════════════════════════════
-# 5.  STORAGE LAYER
-# ═════════════════════════════════════════════════════════════════════════════
-SY = TY + TH + 32
-SH = 90
-parts.append(rect(MX, SY, MW, SH, ST["f"], ST["s"], rx=10, filt="url(#sh)"))
-parts.append(tier_header(MX, SY, MW, "5", "Storage and Data Layer", ST))
 
-# Storage items — evenly distributed: equal gap on left, between, and right.
-# gap = (container_width − 3×item_width) / 4
-ST_ITEM_W = 228
-ST_GAP    = (MW - 3 * ST_ITEM_W) / 4   # ≈ 26.5 px  (float for precision)
+# =============================================================================
+# 5. DATA STORE  (Storage Layer)
+# =============================================================================
+# Use the taller of the two panels to set SY
+TH_MAX = max(TH_RAG, TH_LG)
+SY = TY + TH_MAX + 30
+SH = 86
+parts.append(rect(MX, SY, MW, SH, ST["f"], ST["s"], rx=12, filt="url(#sh)"))
+parts.append(tier_header(MX, SY, MW, "5", "Data Store", ST))
 
-store_meta = [
-    ("📄", "telecom_incidents.csv",        "9,827 rows  ·  10 fields per row",    BE),
-    ("🗄", "ChromaDB",                     "Persistent local vector store",        OAI),
-    ("📊", "BM25 Index",                   "In-memory  ·  rebuilt on each ingest", RAG),
+stores = [
+    ("📄", "Historical Incidents",     "9,827 real telecom fault records",         BE),
+    ("🧠", "AI Memory (Vector DB)",    "Stores questions as searchable AI patterns", OAI),
+    ("🔍", "Keyword Search Index",     "Fast full-text lookup across all incidents",  RAG),
 ]
-for i, (icon, name, desc, t) in enumerate(store_meta):
-    sx = MX + ST_GAP + i * (ST_ITEM_W + ST_GAP)
-    # SY+42: 6 px gap below header (36 px) AND 6 px gap above container bottom
-    # → perfectly vertically centred within the 54 px content area
-    parts.append(rect(sx, SY+42, ST_ITEM_W, 42, t["cf"], t["s"], rx=7, sw=1))
-    parts.append(txt(sx+14, SY+63, icon, size=15, fill=t["ct"], anchor="start"))
-    parts.append(txt(sx+38, SY+56, name, size=9.5, fill=t["ct"],
-                     weight="bold", anchor="start"))
-    parts.append(txt(sx+38, SY+70, desc, size=7.5, fill=t["st"],
-                     anchor="start"))
+SI_W = 238
+si_gap = (MW - 3 * SI_W) / 4
+for i, (icon, name, desc, t) in enumerate(stores):
+    sx = MX + si_gap + i * (SI_W + si_gap)
+    parts.append(rect(sx, SY+42, SI_W, 38, t["cf"], t["s"], rx=8, sw=1))
+    parts.append(txt(sx+14, SY+61, icon, size=16, fill=t["ct"], anchor="start"))
+    parts.append(txt(sx+38, SY+54, name, size=9.5, fill=t["ct"], weight="bold", anchor="start"))
+    parts.append(txt(sx+38, SY+68, desc, size=7.5, fill=t["st"], anchor="start"))
 
-# arrow RAG → Storage (down)
+# Arrow: Knowledge Search → Data Store
 RCX = RAG_X + RAG_W//2
-parts.append(line(RCX, TY+TH, RCX, SY, stroke=RAG["s"], sw=1.8))
-parts.append(arrow_lbl(RCX+46, TY+TH+16, "Query / Store", RAG["s"], size=8))
+parts.append(line(RCX, TY+TH_RAG, RCX, SY, stroke=RAG["s"], sw=1.8))
+parts.append(flow_label(RCX+50, TY+TH_RAG+14, "Read & write data", RAG["s"]))
 
-# ═════════════════════════════════════════════════════════════════════════════
+
+# =============================================================================
 # RIGHT COLUMN — External Services
-# ═════════════════════════════════════════════════════════════════════════════
-def ext_box(x, y, w, h, num, icon, title, bullets, t):
-    s  = rect(x, y, w, h, t["f"], t["s"], rx=10, sw=1.5, filt="url(#shSm)")
+# =============================================================================
+def ext_box(x, y, w, num, icon, title, subtitle, bullets, tech_bullets, t):
+    h = 38 + 22 + len(bullets)*22 + 18 + (len(tech_bullets)*16 + 8 if tech_bullets else 0) + 12
+    s  = rect(x, y, w, h, t["f"], t["s"], rx=12, sw=1.5, filt="url(#shSm)")
     s += tier_header(x, y, w, num, f"{icon}  {title}", t)
-    # Left padding 32 px for dot, 50 px for text — clear whitespace on the
-    # left edge; remaining ~195 px on the right is ample for text.
+    s += txt(x+16, y+50, subtitle, size=8.5, fill=MID, anchor="start", weight="600")
     for j, b in enumerate(bullets):
-        row_y = y + 54 + j * 20
-        s += (f'<circle cx="{x+32}" cy="{row_y}" r="3" fill="{t["s"]}"/>')
-        s += txt(x+46, row_y, b, size=8.5, fill=t["ct"], anchor="start")
-    return s
+        row_y = y + 66 + j*22
+        s += (f'<circle cx="{x+20}" cy="{row_y}" r="3.5" fill="{t["s"]}"/>')
+        s += txt(x+34, row_y, b, size=8.5, fill=t["ct"], anchor="start")
+    if tech_bullets:
+        sep_y = y + 66 + len(bullets)*22 + 4
+        s += f'<line x1="{x+12}" y1="{sep_y}" x2="{x+w-12}" y2="{sep_y}" stroke="{BORDER}" stroke-width="1"/>'
+        s += txt(x+16, sep_y+10, "Under the hood:", size=7.5, fill=FAINT, anchor="start", italic=True)
+        for j, b in enumerate(tech_bullets):
+            s += txt(x+16, sep_y+22+j*16, b, size=7.5, fill=FAINT, anchor="start")
+    return s, h
 
-# Box heights: header=36px, top-pad=18px, then rows at 20px each, bottom-pad=14px
-# OAI: 5 bullets → 36 + 18 + 5×20 + 14 = 168
 OAI_Y = BY
-OAI_H = 168
-parts.append(ext_box(RX, OAI_Y, RW, OAI_H, "6", "🤖", "OpenAI API",
-    ["GPT-4o-mini / gpt-4o",
-     "text-embedding-3-small",
-     "Via corporate proxy",
-     "SSL bypass (httpx)",
-     "max_tokens = 500"], OAI))
+oai_box, OAI_H = ext_box(
+    RX, OAI_Y, RW, "6", "🤖", "AI Language Model",
+    "Powers all reasoning & text generation",
+    ["Understands natural language questions",
+     "Reasons step-by-step like an expert",
+     "Generates clear, structured answers"],
+    ["GPT-4o-mini / GPT-4o", "text-embedding-3-small", "OpenAI API"],
+    OAI)
+parts.append(oai_box)
 
-# LS: 3 bullets → 36 + 18 + 3×20 + 14 = 128
-LS_Y  = OAI_Y + OAI_H + 18
-LS_H  = 128
-parts.append(ext_box(RX, LS_Y, RW, LS_H, "7", "📊", "LangSmith",
-    ["Tracing and observability",
-     "Agent step timings",
-     "LANGCHAIN_TRACING_V2=true"], LS))
+LS_Y = OAI_Y + OAI_H + 16
+ls_box, LS_H = ext_box(
+    RX, LS_Y, RW, "7", "📈", "Activity Monitor",
+    "Records every step the AI takes",
+    ["Tracks how long each agent runs",
+     "Helps the team tune performance",
+     "Flags slow or failing steps"],
+    ["LangSmith · LANGCHAIN_TRACING_V2"],
+    LS)
+parts.append(ls_box)
 
-# DE: 4 bullets → 36 + 18 + 4×20 + 14 = 148
-DE_Y  = LS_Y + LS_H + 18
-DE_H  = 148
-parts.append(ext_box(RX, DE_Y, RW, DE_H, "8", "📋", "DeepEval",
-    ["Faithfulness score",
-     "Answer relevancy score",
-     "Context precision score",
-     "Direct LLM-as-judge calls"], DE))
+DE_Y = LS_Y + LS_H + 16
+de_box, DE_H = ext_box(
+    RX, DE_Y, RW, "8", "✅", "Quality Checker",
+    "Scores the AI's answers automatically",
+    ["Is the answer faithful to the evidence?",
+     "Is it relevant to what was asked?",
+     "Is the supporting context accurate?"],
+    ["DeepEval · LLM-as-judge scoring"],
+    DE)
+parts.append(de_box)
 
-# ── Arrows to right column ────────────────────────────────────────────────────
-BE_RX = MX + MW
+
+# ── Right-column connection arrows ────────────────────────────────────────────
+BE_RX  = MX + MW
 OAI_LX = RX
+OAI_CY = OAI_Y + OAI_H//2
+LS_CY  = LS_Y  + LS_H//2
+DE_CY  = DE_Y  + DE_H//2
 
-# Backend → OpenAI
+# Processing Engine → AI Language Model
 BY_C = BY + BH//2
-OAI_C = OAI_Y + OAI_H//2
-parts.append(line(BE_RX, BY_C, OAI_LX, OAI_C, stroke=OAI["s"], sw=1.8))
-parts.append(arrow_lbl((BE_RX+OAI_LX)//2, BY_C-12, "LLM calls", OAI["s"]))
+parts.append(line(BE_RX, BY_C, OAI_LX, OAI_CY, stroke=OAI["s"], sw=1.8))
+parts.append(flow_label((BE_RX+OAI_LX)//2, BY_C-14, "AI calls", OAI["s"]))
 
-# RAG → OpenAI (dashed, embed)
-R_RX  = RAG_X + RAG_W
-R_MY  = TY + TH//2 - 20
+# Knowledge Search → AI Language Model (dashed, embedding)
+R_RX = RAG_X + RAG_W
+R_MY = TY + TH_RAG//2 - 20
 parts.append(path(f"M {R_RX} {R_MY} L {BE_RX+22} {R_MY} "
-                  f"L {BE_RX+22} {OAI_C+20} L {OAI_LX} {OAI_C+20}",
+                  f"L {BE_RX+22} {OAI_CY+22} L {OAI_LX} {OAI_CY+22}",
                   stroke=OAI["s"], sw=1.5, dash="5 4"))
-parts.append(arrow_lbl(BE_RX+22, R_MY-12, "Embed API", OAI["s"]))
+parts.append(flow_label(BE_RX+22, R_MY-14, "Convert to AI format", OAI["s"]))
 
-# LangGraph → OpenAI
-L_RX  = LG_X + LG_W
-L_MY  = TY + TH//2 + 20
+# AI Analysis Pipeline → AI Language Model
+L_RX = LG_X + LG_W
+L_MY = TY + TH_LG//2 + 18
 parts.append(path(f"M {L_RX} {L_MY} L {OAI_LX} {L_MY} "
-                  f"L {OAI_LX} {OAI_C-10}",
+                  f"L {OAI_LX} {OAI_CY-12}",
                   stroke=OAI["s"], sw=1.8))
-parts.append(arrow_lbl((L_RX+OAI_LX)//2, L_MY-12, "GPT-4o", OAI["s"]))
+parts.append(flow_label((L_RX+OAI_LX)//2, L_MY-14, "Generate diagnosis", OAI["s"]))
 
-# Backend → LangSmith (dashed)
-LS_C  = LS_Y + LS_H//2
+# Processing Engine → Activity Monitor (dashed)
 parts.append(path(f"M {BE_RX} {BY+BH*0.68} L {OAI_LX-12} {BY+BH*0.68} "
-                  f"L {OAI_LX-12} {LS_C} L {OAI_LX} {LS_C}",
+                  f"L {OAI_LX-12} {LS_CY} L {OAI_LX} {LS_CY}",
                   stroke=LS["s"], sw=1.5, dash="5 4"))
-parts.append(arrow_lbl(BE_RX+20, BY+BH*0.68-12, "Tracing", LS["s"]))
+parts.append(flow_label(BE_RX+24, BY+BH*0.68-14, "Log activity", LS["s"]))
 
-# Backend → DeepEval
-DE_C  = DE_Y + DE_H//2
-parts.append(path(f"M {BE_RX} {BY+BH*0.92} L {OAI_LX-24} {BY+BH*0.92} "
-                  f"L {OAI_LX-24} {DE_C} L {OAI_LX} {DE_C}",
+# Processing Engine → Quality Checker
+parts.append(path(f"M {BE_RX} {BY+BH*0.88} L {OAI_LX-24} {BY+BH*0.88} "
+                  f"L {OAI_LX-24} {DE_CY} L {OAI_LX} {DE_CY}",
                   stroke=DE["s"], sw=1.8))
-parts.append(arrow_lbl(BE_RX+20, BY+BH*0.92-12, "Evaluate", DE["s"]))
+parts.append(flow_label(BE_RX+24, BY+BH*0.88-14, "Score answer", DE["s"]))
 
-# ═════════════════════════════════════════════════════════════════════════════
+
+# =============================================================================
 # LEGEND
-# ═════════════════════════════════════════════════════════════════════════════
-LEG_Y = SY + SH + 26
-LEG_H = 52
+# =============================================================================
+LEG_Y = SY + SH + 24
+LEG_H = 54
 LTOT  = RX + RW - MX
 parts.append(rect(MX, LEG_Y, LTOT, LEG_H, WHITE, BORDER, rx=8, sw=1))
-parts.append(txt(MX+14, LEG_Y+15, "Legend:", size=9,
+parts.append(txt(MX+16, LEG_Y+16, "Components:", size=9,
                  fill=MID, weight="bold", anchor="start"))
 
-# Legend chips — auto-spaced so gaps between all chips are exactly equal.
-# LTOT is the total legend bar width; 72 px reserved on the left for "Legend:".
-LEGEND_LABEL_W = 72
 leg_data = [
-    ("⚛", "React Frontend",  FE),
-    ("⚡", "FastAPI Backend", BE),
-    ("🔍", "RAG Pipeline",   RAG),
-    ("🤖", "LangGraph",      LG),
-    ("🗂",  "Storage",        ST),
-    ("🌐", "External APIs",  OAI),
-    ("📊", "LangSmith",      LS),
-    ("📋", "DeepEval",       DE),
+    ("Web Dashboard",      FE,  "⚛"),
+    ("Processing Engine",  BE,  "⚙"),
+    ("Knowledge Search",   RAG, "🔍"),
+    ("AI Agent Pipeline",  LG,  "🤖"),
+    ("Data Store",         ST,  "🗂"),
+    ("AI Language Model",  OAI, "💬"),
+    ("Activity Monitor",   LS,  "📈"),
+    ("Quality Checker",    DE,  "✅"),
 ]
-chip_widths  = [len(label) * 6.8 + 30 for _, label, _ in leg_data]
-total_cw     = sum(chip_widths)
-avail_w      = LTOT - LEGEND_LABEL_W
-# Equal gap before first chip, between every chip, and after the last chip
-gap          = (avail_w - total_cw) / (len(leg_data) + 1)
-lx           = MX + LEGEND_LABEL_W + gap
-for (icon, label, t), cw in zip(leg_data, chip_widths):
-    parts.append(rect(lx, LEG_Y+24, cw, 20, t["cf"], t["s"], rx=5, sw=1))
-    parts.append(txt(lx+8,  LEG_Y+34, icon,  size=10, fill=t["ct"], anchor="start"))
-    parts.append(txt(lx+24, LEG_Y+34, label, size=8,  fill=t["ct"],
-                     weight="600", anchor="start"))
+chip_widths = [len(label)*6.4 + 32 for _, _, label in [(t, c, n) for n, c, t in leg_data]]
+LABEL_W = 100
+avail_w = LTOT - LABEL_W
+total_cw = sum(chip_widths)
+gap = (avail_w - total_cw) / (len(leg_data) + 1)
+lx = MX + LABEL_W + gap
+for (name, t, icon), cw in zip(leg_data, chip_widths):
+    parts.append(rect(lx, LEG_Y+26, cw, 20, t["cf"], t["s"], rx=5, sw=0.8))
+    parts.append(txt(lx+8,  LEG_Y+36, icon, size=10, fill=t["ct"], anchor="start"))
+    parts.append(txt(lx+24, LEG_Y+36, name, size=8,  fill=t["ct"], weight="600", anchor="start"))
     lx += cw + gap
 
-# ═════════════════════════════════════════════════════════════════════════════
+
+# =============================================================================
 # FOOTER
-# ═════════════════════════════════════════════════════════════════════════════
+# =============================================================================
 FT_Y = LEG_Y + LEG_H + 12
 parts.append(f'<line x1="{MX}" y1="{FT_Y}" x2="{RX+RW}" y2="{FT_Y}" '
              f'stroke="{BORDER}" stroke-width="1"/>')
-parts.append(txt(MC, FT_Y+14,
-    "FaultSense AI  ·  TelecomNetworkFaultIntel  ·  "
-    "RAG + LangGraph + DeepEval + LangSmith  ·  2026",
+parts.append(txt(TC, FT_Y+14,
+    "FaultSense AI  ·  AI-Powered Telecom Fault Intelligence  ·  "
+    "RAG + Multi-Agent AI + Automated Quality Scoring  ·  2026",
     size=8.5, fill=FAINT))
+
 
 # ── Assemble SVG ──────────────────────────────────────────────────────────────
 TOTAL_H = FT_Y + 30
@@ -434,12 +478,13 @@ svg = f"""<?xml version="1.0" encoding="UTF-8"?>
 <svg width="{W}" height="{TOTAL_H}" viewBox="0 0 {W} {TOTAL_H}"
      xmlns="http://www.w3.org/2000/svg" role="img"
      style="font-family:{FONT}; background:{BG}">
-<title>FaultSense AI — Telecom Network Fault Intelligence Architecture</title>
-<desc>Light-theme system architecture: React Frontend, FastAPI Backend,
-RAG Pipeline, LangGraph Agents, Storage, OpenAI, LangSmith, DeepEval.</desc>
+<title>FaultSense AI — How It Works</title>
+<desc>Presentation-friendly architecture diagram showing the end-to-end flow
+from a plain-English question to a diagnosed root cause and fix recommendations.
+Designed for mixed technical and non-technical audiences.</desc>
 {''.join(parts)}
 </svg>"""
 
 with open(OUT, "w", encoding="utf-8") as f:
     f.write(svg)
-print(f"SVG created: {OUT}  ({TOTAL_H}px tall)")
+print(f"SVG written: {OUT}  ({TOTAL_H}px tall)")
