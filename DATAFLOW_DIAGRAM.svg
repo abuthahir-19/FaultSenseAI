@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="500" viewBox="0 0 1200 500"
+     xmlns="http://www.w3.org/2000/svg" role="img"
+     style="font-family:'Segoe UI', -apple-system, 'Inter', sans-serif; background:#F8FAFC">
+<title>FaultSense AI — Data Flow Pipeline</title>
+<desc>5-step pipeline: CSV File to Ingestion to Embeddings to ChromaDB to BM25 Index</desc>
+<defs>
+  <!-- arrowhead marker for each step colour -->
+  <marker id="arr-g" viewBox="0 0 10 10" refX="9" refY="5"
+          markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M1 2 L8 5 L1 8" fill="none" stroke="#16A34A"
+          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+  <marker id="arr-b" viewBox="0 0 10 10" refX="9" refY="5"
+          markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M1 2 L8 5 L1 8" fill="none" stroke="#1D4ED8"
+          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+  <marker id="arr-a" viewBox="0 0 10 10" refX="9" refY="5"
+          markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M1 2 L8 5 L1 8" fill="none" stroke="#D97706"
+          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+  <marker id="arr-v" viewBox="0 0 10 10" refX="9" refY="5"
+          markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M1 2 L8 5 L1 8" fill="none" stroke="#7C3AED"
+          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+  <filter id="shadow">
+    <feDropShadow dx="0" dy="3" stdDeviation="5"
+                  flood-color="#0F172A" flood-opacity="0.10"/>
+  </filter>
+  <filter id="glow">
+    <feDropShadow dx="0" dy="0" stdDeviation="6"
+                  flood-color="#0F172A" flood-opacity="0.08"/>
+  </filter>
+</defs>
+<rect width="1200" height="500" fill="#F8FAFC"/>
+<pattern id="dots" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
+  <circle cx="14" cy="14" r="1.2" fill="#CBD5E1" opacity="0.5"/>
+</pattern>
+<rect width="1200" height="500" fill="url(#dots)"/>
+
+<!-- Title banner -->
+<rect x="0" y="0" width="1200" height="90" rx="0"
+      fill="#0F172A"/>
+<rect x="0" y="86" width="1200" height="4" fill="#F26B43"/>
+
+<text x="600" y="36" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="22" font-weight="800" fill="#F8FAFC"
+      dominant-baseline="central">
+  📊  Data Flow Pipeline  —  FaultSense AI
+</text>
+<text x="600" y="66" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="12" fill="#94A3B8"
+      dominant-baseline="central">
+  How raw incident data flows from a CSV file to a fully searchable AI knowledge base
+</text>
+
+<!-- Card 1: CSV File -->
+<rect x="47" y="120" width="178" height="270" rx="16"
+      fill="#F0FDF4" filter="url(#shadow)"
+      stroke="#16A34A" stroke-width="1.8"/>
+<rect x="47" y="120" width="178" height="8" rx="16"
+      fill="#16A34A"/>
+<rect x="47" y="124" width="178" height="4" fill="#16A34A"/>
+<circle cx="69" cy="152" r="16" fill="#16A34A"/>
+<text x="69" y="152" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="11" font-weight="800" fill="white">01</text>
+<circle cx="136" cy="196" r="36"
+      fill="#BBF7D0" opacity="0.7"/>
+<circle cx="136" cy="196" r="30"
+      fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
+<text x="136" y="196" text-anchor="middle" dominant-baseline="central"
+      font-size="28">📄</text>
+<text x="136" y="246" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="14" font-weight="700" fill="#0F172A"
+      dominant-baseline="central">CSV File</text>
+<text x="136" y="268" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="10" font-weight="600" fill="#16A34A"
+      dominant-baseline="central">telecom_incidents.csv</text>
+<line x1="65" y1="282" x2="207" y2="282"
+      stroke="#E2E8F0" stroke-width="1.2"/>
+<text x="136" y="298" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9.5" fill="#475569"
+      dominant-baseline="central">9,827 incident records</text>
+<text x="136" y="318" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9.5" fill="#475569"
+      dominant-baseline="central">10 fields per row</text>
+
+<!-- Arrow 1→2 -->
+<line x1="229" y1="255" x2="275" y2="255"
+      stroke="#1D4ED8" stroke-width="2.5"
+      marker-end="url(#arr-g)" stroke-linecap="round"/>
+<rect x="221" y="243" width="63" height="20"
+      rx="10" fill="white" stroke="#1D4ED8" stroke-width="1"/>
+<text x="252" y="253" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="8.5" font-weight="600" fill="#1D4ED8">trigger</text>
+
+<!-- Card 2: Ingestion Pipeline -->
+<rect x="279" y="120" width="178" height="270" rx="16"
+      fill="#EFF6FF" filter="url(#shadow)"
+      stroke="#1D4ED8" stroke-width="1.8"/>
+<rect x="279" y="120" width="178" height="8" rx="16"
+      fill="#1D4ED8"/>
+<rect x="279" y="124" width="178" height="4" fill="#1D4ED8"/>
+<circle cx="301" cy="152" r="16" fill="#1D4ED8"/>
+<text x="301" y="152" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="11" font-weight="800" fill="white">02</text>
+<circle cx="368" cy="196" r="36"
+      fill="#BFDBFE" opacity="0.7"/>
+<circle cx="368" cy="196" r="30"
+      fill="#EFF6FF" stroke="#1D4ED8" stroke-width="2"/>
+<text x="368" y="196" text-anchor="middle" dominant-baseline="central"
+      font-size="28">⚡</text>
+<text x="368" y="246" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="14" font-weight="700" fill="#0F172A"
+      dominant-baseline="central">Ingestion Pipeline</text>
+<text x="368" y="268" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="10" font-weight="600" fill="#1D4ED8"
+      dominant-baseline="central">Backend Worker</text>
+<line x1="297" y1="282" x2="439" y2="282"
+      stroke="#E2E8F0" stroke-width="1.2"/>
+<text x="368" y="298" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9.5" fill="#475569"
+      dominant-baseline="central">POST /api/ingest</text>
+<text x="368" y="318" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9.5" fill="#475569"
+      dominant-baseline="central">Background task</text>
+
+<!-- Arrow 2→3 -->
+<line x1="461" y1="255" x2="507" y2="255"
+      stroke="#D97706" stroke-width="2.5"
+      marker-end="url(#arr-b)" stroke-linecap="round"/>
+<rect x="446" y="243" width="77" height="20"
+      rx="10" fill="white" stroke="#D97706" stroke-width="1"/>
+<text x="484" y="253" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="8.5" font-weight="600" fill="#D97706">vectorise</text>
+
+<!-- Card 3: Generate Embeddings -->
+<rect x="511" y="120" width="178" height="270" rx="16"
+      fill="#FFFBEB" filter="url(#shadow)"
+      stroke="#D97706" stroke-width="1.8"/>
+<rect x="511" y="120" width="178" height="8" rx="16"
+      fill="#D97706"/>
+<rect x="511" y="124" width="178" height="4" fill="#D97706"/>
+<circle cx="533" cy="152" r="16" fill="#D97706"/>
+<text x="533" y="152" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="11" font-weight="800" fill="white">03</text>
+<circle cx="600" cy="196" r="36"
+      fill="#FDE68A" opacity="0.7"/>
+<circle cx="600" cy="196" r="30"
+      fill="#FFFBEB" stroke="#D97706" stroke-width="2"/>
+<text x="600" y="196" text-anchor="middle" dominant-baseline="central"
+      font-size="28">🧠</text>
+<text x="600" y="246" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="14" font-weight="700" fill="#0F172A"
+      dominant-baseline="central">Generate Embeddings</text>
+<text x="600" y="268" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="10" font-weight="600" fill="#D97706"
+      dominant-baseline="central">text-embedding-3-small</text>
+<line x1="529" y1="282" x2="671" y2="282"
+      stroke="#E2E8F0" stroke-width="1.2"/>
+<text x="600" y="298" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9.5" fill="#475569"
+      dominant-baseline="central">OpenAI API</text>
+<text x="600" y="318" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9.5" fill="#475569"
+      dominant-baseline="central">3 workers · batch 512</text>
+
+<!-- Arrow 3→4 -->
+<line x1="693" y1="255" x2="739" y2="255"
+      stroke="#7C3AED" stroke-width="2.5"
+      marker-end="url(#arr-a)" stroke-linecap="round"/>
+<rect x="692" y="243" width="49" height="20"
+      rx="10" fill="white" stroke="#7C3AED" stroke-width="1"/>
+<text x="716" y="253" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="8.5" font-weight="600" fill="#7C3AED">store</text>
+
+<!-- Card 4: Store in ChromaDB -->
+<rect x="743" y="120" width="178" height="270" rx="16"
+      fill="#F5F3FF" filter="url(#shadow)"
+      stroke="#7C3AED" stroke-width="1.8"/>
+<rect x="743" y="120" width="178" height="8" rx="16"
+      fill="#7C3AED"/>
+<rect x="743" y="124" width="178" height="4" fill="#7C3AED"/>
+<circle cx="765" cy="152" r="16" fill="#7C3AED"/>
+<text x="765" y="152" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="11" font-weight="800" fill="white">04</text>
+<circle cx="832" cy="196" r="36"
+      fill="#DDD6FE" opacity="0.7"/>
+<circle cx="832" cy="196" r="30"
+      fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+<text x="832" y="196" text-anchor="middle" dominant-baseline="central"
+      font-size="28">🗄</text>
+<text x="832" y="246" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="14" font-weight="700" fill="#0F172A"
+      dominant-baseline="central">Store in ChromaDB</text>
+<text x="832" y="268" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="10" font-weight="600" fill="#7C3AED"
+      dominant-baseline="central">Vector Database</text>
+<line x1="761" y1="282" x2="903" y2="282"
+      stroke="#E2E8F0" stroke-width="1.2"/>
+<text x="832" y="298" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9.5" fill="#475569"
+      dominant-baseline="central">Persistent local store</text>
+<text x="832" y="318" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9.5" fill="#475569"
+      dominant-baseline="central">1536-dim vectors</text>
+
+<!-- Arrow 4→5 -->
+<line x1="925" y1="255" x2="971" y2="255"
+      stroke="#0F766E" stroke-width="2.5"
+      marker-end="url(#arr-v)" stroke-linecap="round"/>
+<rect x="924" y="243" width="49" height="20"
+      rx="10" fill="white" stroke="#0F766E" stroke-width="1"/>
+<text x="948" y="253" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="8.5" font-weight="600" fill="#0F766E">index</text>
+
+<!-- Card 5: Build BM25 Index -->
+<rect x="975" y="120" width="178" height="270" rx="16"
+      fill="#F0FDFA" filter="url(#shadow)"
+      stroke="#0F766E" stroke-width="1.8"/>
+<rect x="975" y="120" width="178" height="8" rx="16"
+      fill="#0F766E"/>
+<rect x="975" y="124" width="178" height="4" fill="#0F766E"/>
+<circle cx="997" cy="152" r="16" fill="#0F766E"/>
+<text x="997" y="152" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="11" font-weight="800" fill="white">05</text>
+<circle cx="1064" cy="196" r="36"
+      fill="#99F6E4" opacity="0.7"/>
+<circle cx="1064" cy="196" r="30"
+      fill="#F0FDFA" stroke="#0F766E" stroke-width="2"/>
+<text x="1064" y="196" text-anchor="middle" dominant-baseline="central"
+      font-size="28">🔍</text>
+<text x="1064" y="246" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="14" font-weight="700" fill="#0F172A"
+      dominant-baseline="central">Build BM25 Index</text>
+<text x="1064" y="268" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="10" font-weight="600" fill="#0F766E"
+      dominant-baseline="central">Keyword Search Index</text>
+<line x1="993" y1="282" x2="1135" y2="282"
+      stroke="#E2E8F0" stroke-width="1.2"/>
+<text x="1064" y="298" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9.5" fill="#475569"
+      dominant-baseline="central">rank_bm25 library</text>
+<text x="1064" y="318" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9.5" fill="#475569"
+      dominant-baseline="central">In-memory index</text>
+
+<!-- Bottom summary bar -->
+<rect x="47" y="412" width="1106" height="38" rx="8"
+      fill="#1E293B"/>
+<text x="157.6" y="431" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9" fill="#94A3B8" dominant-baseline="central"
+      font-style="italic">pandas · CSV reader</text>
+<text x="378.8" y="431" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9" fill="#94A3B8" dominant-baseline="central"
+      font-style="italic">FastAPI BackgroundTask</text>
+<text x="600.0" y="431" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9" fill="#94A3B8" dominant-baseline="central"
+      font-style="italic">OpenAI text-embedding-3-small</text>
+<text x="821.2" y="431" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9" fill="#94A3B8" dominant-baseline="central"
+      font-style="italic">ChromaDB persistent</text>
+<text x="1042.4" y="431" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9" fill="#94A3B8" dominant-baseline="central"
+      font-style="italic">rank_bm25 library</text>
+
+<!-- Full-width flow spine -->
+<line x1="47" y1="255" x2="1153" y2="255"
+      stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4 6"/>
+
+<text x="600" y="488" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9" fill="#CBD5E1">
+  FaultSense AI  ·  Telecom Network Fault Intelligence Platform  ·  2026
+</text>
+</svg>

@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="500" viewBox="0 0 1200 500"
+     xmlns="http://www.w3.org/2000/svg" role="img"
+     style="font-family:'Segoe UI', -apple-system, 'Inter', sans-serif; background:#F8FAFC">
+<title>🔎  Quick Search Flow  —  FaultSense AI</title>
+<defs>
+  <marker id="arr0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 2 L8 5 L1 8" fill="none" stroke="#EA580C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  <marker id="arr1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 2 L8 5 L1 8" fill="none" stroke="#1D4ED8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 2 L8 5 L1 8" fill="none" stroke="#D97706" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  <marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 2 L8 5 L1 8" fill="none" stroke="#16A34A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  <filter id="sh"><feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.10"/></filter>
+</defs>
+<rect width="1200" height="500" fill="#F8FAFC"/>
+<defs>
+  <pattern id="dg" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+    <circle cx="15" cy="15" r="1.1" fill="#CBD5E1" opacity="0.45"/>
+  </pattern>
+</defs>
+<rect width="1200" height="500" fill="url(#dg)"/>
+<rect x="0" y="0" width="1200" height="88" fill="#1D4ED8"/>
+<rect x="0" y="83" width="1200" height="5" fill="#F26B43"/>
+<text x="600" y="34" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="21" font-weight="800" fill="#F8FAFC">
+  🔎  Quick Search Flow  —  FaultSense AI
+</text>
+<text x="600" y="63" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="11" fill="#94A3B8">
+  Fast hybrid retrieval with an inline AI root cause suggestion — results in seconds
+</text>
+<line x1="76" y1="248"
+      x2="1124" y2="248"
+      stroke="#E2E8F0" stroke-width="1" stroke-dasharray="5 7"/>
+
+<!-- Card 1: User Query -->
+<rect x="76" y="116" width="168" height="265" rx="15"
+      fill="#F8FAFC" stroke="#475569" stroke-width="1.8" filter="url(#sh)"/>
+<rect x="76" y="116" width="168" height="8" rx="15" fill="#475569"/>
+<rect x="76" y="120" width="168" height="4" fill="#475569"/>
+<circle cx="98" cy="148" r="15" fill="#475569"/>
+<text x="98" y="148" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="11" font-weight="800" fill="white">1</text>
+<circle cx="160" cy="192" r="38" fill="#E2E8F0" opacity="0.55"/>
+<circle cx="160" cy="192" r="30"
+      fill="#F8FAFC" stroke="#475569" stroke-width="2.2"/>
+<text x="160" y="192" text-anchor="middle" dominant-baseline="central"
+      font-size="26">🔎</text>
+<text x="160" y="242" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="13.5" font-weight="700" fill="#0F172A">User Query</text>
+<text x="160" y="263" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="10" font-weight="600" fill="#475569">Plain English Input</text>
+<line x1="92" y1="277" x2="228" y2="277"
+      stroke="#E2E8F0" stroke-width="1.2"/>
+<text x="160" y="293" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9" fill="#475569">Type your fault description</text>
+<text x="160" y="314" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9" fill="#475569">No technical knowledge needed</text>
+<line x1="248" y1="248" x2="292" y2="248"
+      stroke="#EA580C" stroke-width="2.5" stroke-linecap="round"
+      marker-end="url(#arr0)"/>
+<rect x="234" y="235" width="72" height="21"
+      rx="10" fill="white" stroke="#EA580C" stroke-width="1"/>
+<text x="270" y="246" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="8.5" font-weight="600" fill="#EA580C">validate</text>
+
+<!-- Card 2: Guardrail Check -->
+<rect x="296" y="116" width="168" height="265" rx="15"
+      fill="#FFF7ED" stroke="#EA580C" stroke-width="1.8" filter="url(#sh)"/>
+<rect x="296" y="116" width="168" height="8" rx="15" fill="#EA580C"/>
+<rect x="296" y="120" width="168" height="4" fill="#EA580C"/>
+<circle cx="318" cy="148" r="15" fill="#EA580C"/>
+<text x="318" y="148" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="11" font-weight="800" fill="white">2</text>
+<circle cx="380" cy="192" r="38" fill="#FED7AA" opacity="0.55"/>
+<circle cx="380" cy="192" r="30"
+      fill="#FFF7ED" stroke="#EA580C" stroke-width="2.2"/>
+<text x="380" y="192" text-anchor="middle" dominant-baseline="central"
+      font-size="26">🛡</text>
+<text x="380" y="242" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="13.5" font-weight="700" fill="#0F172A">Guardrail Check</text>
+<text x="380" y="263" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="10" font-weight="600" fill="#EA580C">Input Validation</text>
+<line x1="312" y1="277" x2="448" y2="277"
+      stroke="#E2E8F0" stroke-width="1.2"/>
+<text x="380" y="293" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9" fill="#475569">Is the query safe?</text>
+<text x="380" y="314" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9" fill="#475569">Is it telecom-related?</text>
+<line x1="468" y1="248" x2="512" y2="248"
+      stroke="#1D4ED8" stroke-width="2.5" stroke-linecap="round"
+      marker-end="url(#arr1)"/>
+<rect x="461" y="235" width="58" height="21"
+      rx="10" fill="white" stroke="#1D4ED8" stroke-width="1"/>
+<text x="490" y="246" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="8.5" font-weight="600" fill="#1D4ED8">search</text>
+
+<!-- Card 3: Hybrid Search -->
+<rect x="516" y="116" width="168" height="265" rx="15"
+      fill="#EFF6FF" stroke="#1D4ED8" stroke-width="1.8" filter="url(#sh)"/>
+<rect x="516" y="116" width="168" height="8" rx="15" fill="#1D4ED8"/>
+<rect x="516" y="120" width="168" height="4" fill="#1D4ED8"/>
+<circle cx="538" cy="148" r="15" fill="#1D4ED8"/>
+<text x="538" y="148" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="11" font-weight="800" fill="white">3</text>
+<circle cx="600" cy="192" r="38" fill="#BFDBFE" opacity="0.55"/>
+<circle cx="600" cy="192" r="30"
+      fill="#EFF6FF" stroke="#1D4ED8" stroke-width="2.2"/>
+<text x="600" y="192" text-anchor="middle" dominant-baseline="central"
+      font-size="26">🔍</text>
+<text x="600" y="242" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="13.5" font-weight="700" fill="#0F172A">Hybrid Search</text>
+<text x="600" y="263" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="10" font-weight="600" fill="#1D4ED8">Find Similar Incidents</text>
+<line x1="532" y1="277" x2="668" y2="277"
+      stroke="#E2E8F0" stroke-width="1.2"/>
+<text x="600" y="293" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9" fill="#475569">Semantic + keyword search</text>
+<text x="600" y="314" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9" fill="#475569">Best matches ranked by score</text>
+<line x1="688" y1="248" x2="732" y2="248"
+      stroke="#D97706" stroke-width="2.5" stroke-linecap="round"
+      marker-end="url(#arr2)"/>
+<rect x="678" y="235" width="65" height="21"
+      rx="10" fill="white" stroke="#D97706" stroke-width="1"/>
+<text x="710" y="246" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="8.5" font-weight="600" fill="#D97706">suggest</text>
+
+<!-- Card 4: Quick Root Cause -->
+<rect x="736" y="116" width="168" height="265" rx="15"
+      fill="#FFFBEB" stroke="#D97706" stroke-width="1.8" filter="url(#sh)"/>
+<rect x="736" y="116" width="168" height="8" rx="15" fill="#D97706"/>
+<rect x="736" y="120" width="168" height="4" fill="#D97706"/>
+<circle cx="758" cy="148" r="15" fill="#D97706"/>
+<text x="758" y="148" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="11" font-weight="800" fill="white">4</text>
+<circle cx="820" cy="192" r="38" fill="#FDE68A" opacity="0.55"/>
+<circle cx="820" cy="192" r="30"
+      fill="#FFFBEB" stroke="#D97706" stroke-width="2.2"/>
+<text x="820" y="192" text-anchor="middle" dominant-baseline="central"
+      font-size="26">💡</text>
+<text x="820" y="242" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="13.5" font-weight="700" fill="#0F172A">Quick Root Cause</text>
+<text x="820" y="263" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="10" font-weight="600" fill="#D97706">AI Suggestion</text>
+<line x1="752" y1="277" x2="888" y2="277"
+      stroke="#E2E8F0" stroke-width="1.2"/>
+<text x="820" y="293" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9" fill="#475569">AI reads similar incidents</text>
+<text x="820" y="314" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9" fill="#475569">Suggests likely root cause</text>
+<line x1="908" y1="248" x2="952" y2="248"
+      stroke="#16A34A" stroke-width="2.5" stroke-linecap="round"
+      marker-end="url(#arr3)"/>
+<rect x="898" y="235" width="65" height="21"
+      rx="10" fill="white" stroke="#16A34A" stroke-width="1"/>
+<text x="930" y="246" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="8.5" font-weight="600" fill="#16A34A">display</text>
+
+<!-- Card 5: Results Shown -->
+<rect x="956" y="116" width="168" height="265" rx="15"
+      fill="#F0FDF4" stroke="#16A34A" stroke-width="1.8" filter="url(#sh)"/>
+<rect x="956" y="116" width="168" height="8" rx="15" fill="#16A34A"/>
+<rect x="956" y="120" width="168" height="4" fill="#16A34A"/>
+<circle cx="978" cy="148" r="15" fill="#16A34A"/>
+<text x="978" y="148" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="11" font-weight="800" fill="white">5</text>
+<circle cx="1040" cy="192" r="38" fill="#BBF7D0" opacity="0.55"/>
+<circle cx="1040" cy="192" r="30"
+      fill="#F0FDF4" stroke="#16A34A" stroke-width="2.2"/>
+<text x="1040" y="192" text-anchor="middle" dominant-baseline="central"
+      font-size="26">📋</text>
+<text x="1040" y="242" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="13.5" font-weight="700" fill="#0F172A">Results Shown</text>
+<text x="1040" y="263" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="10" font-weight="600" fill="#16A34A">Incident Cards + Scores</text>
+<line x1="972" y1="277" x2="1108" y2="277"
+      stroke="#E2E8F0" stroke-width="1.2"/>
+<text x="1040" y="293" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9" fill="#475569">Ranked incident cards</text>
+<text x="1040" y="314" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="9" fill="#475569">Severity badges · RRF scores</text>
+<rect x="76" y="401" width="1048" height="36" rx="8"
+      fill="#1E293B"/>
+<text x="180.8" y="419" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="8.5" fill="#94A3B8" font-style="italic">React QueryInput</text>
+<text x="390.4" y="419" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="8.5" fill="#94A3B8" font-style="italic">guardrails.py</text>
+<text x="600.0" y="419" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="8.5" fill="#94A3B8" font-style="italic">ChromaDB + BM25 + RRF</text>
+<text x="809.6" y="419" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="8.5" fill="#94A3B8" font-style="italic">GPT-4o · 2-3 sentences</text>
+<text x="1019.2" y="419" text-anchor="middle" dominant-baseline="central"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="8.5" fill="#94A3B8" font-style="italic">React IncidentCard</text>
+<text x="600" y="489" text-anchor="middle"
+      font-family="'Segoe UI', -apple-system, 'Inter', sans-serif" font-size="8.5" fill="#CBD5E1">
+  FaultSense AI  ·  Telecom Network Fault Intelligence  ·  2026
+</text>
+</svg>
