@@ -59,7 +59,7 @@ Telecom NOC teams face hundreds of alarms per hour. This platform provides:
 
 ## 3. Architecture
 
-![FaultSenseAI System Architecture](./FaultSenseAI_Architecture.png)
+![FaultSenseAI System Architecture](./images/FaultSenseAI_Architecture.png)
 
 > **Full interactive diagram:** open [ARCHITECTURE.html](./ARCHITECTURE.html) in a browser for a zoomable, print-ready version.
 
