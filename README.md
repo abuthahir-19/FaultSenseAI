@@ -59,31 +59,19 @@ Telecom NOC teams face hundreds of alarms per hour. This platform provides:
 
 ## 3. Architecture
 
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│  React Frontend (Vite + TypeScript + TailwindCSS)                    │
-│  QueryInput │ IncidentCard │ AgentTrace │ RootCausePanel             │
-│  RecommendationList │ AnalyticsDashboard │ EvaluationPanel           │
-│  GuardrailPanel │ ErrorBoundary                                      │
-└────────────────────────┬─────────────────────────────────────────────┘
-                         │ HTTP (axios)
-┌────────────────────────▼─────────────────────────────────────────────┐
-│  FastAPI Backend                                                     │
-│  /api/query  /api/analyze  /api/analytics/*  /api/ingest             │
-│  /api/summarize  /api/evaluate  /api/rerank  /api/incidents          │
-└──────┬──────────────────┬────────────────────────────────────────────┘
-       │                  │
-┌──────▼──────┐   ┌───────▼──────────────────────────────────────────────┐
-│  RAG Layer  │   │  LangGraph 5-Node Pipeline                           │
-│ ChromaDB    │   │  Node 1: Alarm Retrieval (hybrid BM25 + vector RRF)  │
-│ BM25 Index  │   │  Node 2: Cross-Correlation (utils/correlation.py)    │
-│ Hybrid RRF  │   │  Node 3: Root Cause Analysis (GPT-4o)                │
-└─────────────┘   │  Node 4: Service Impact (standard | escalated fork)  │
-                  │  Node 5: Resolution Recommendation (GPT-4o JSON)     │
-                  └──────────────────────────────────────────────────────┘
-```
+![FaultSenseAI System Architecture](./FaultSenseAI_Architecture.png)
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full system diagram and component descriptions.
+> **Full interactive diagram:** open [ARCHITECTURE.html](./ARCHITECTURE.html) in a browser for a zoomable, print-ready version.
+
+### Pipeline Flow
+
+| Step | Component | Description |
+|---|---|---|
+| 1 | **Alarm Retrieval** | Hybrid RAG — ChromaDB semantic + BM25 keyword fused via RRF (k=60) |
+| 2 | **Cross-Correlation** | Deterministic clustering by region + technology; extracts dominant vendor, max severity, time span |
+| 3 | **Root Cause Analysis** | GPT-4o chain-of-thought reasoning grounded in retrieved alarm IDs |
+| 4 | **Service Impact** | Subscriber blast radius, SLA breach risk, cascading failure paths; CRITICAL fork adds emergency/regulatory context |
+| 5 | **Resolution** | Structured JSON remediation — IMMEDIATE / DIAGNOSTIC / RESOLUTION / PREVENTIVE / ESCALATION |
 
 ---
 
